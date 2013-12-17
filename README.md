@@ -1,4 +1,0 @@
-GameProject
-===========
-
-College game
