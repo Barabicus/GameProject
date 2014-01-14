@@ -40,7 +40,6 @@ public class SimpleMobAI : AIPath {
     public override void OnTargetReached()
     {
         base.OnTargetReached();
-        Debug.Log("boo");
         target = null;
         targetCoord = null;
 
