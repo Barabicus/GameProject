@@ -71,11 +71,13 @@ public class Building : ActiveEntity
 
     void Awake()
     {
+        base.Awake();
         GetComponent<ShowRim>().enabled = false;
     }
 
     void Start()
     {
+        base.Start();
         SelectableList.AddSelectableEntity(this);
         if (GetComponent<ShowRim>().enabled)
             Debug.LogError(gameObject.ToString() + "'s showrim should be disabled intially");

@@ -298,6 +298,8 @@ public abstract class Mob : ActiveEntity
         SelectableList.AddSelectableEntity(this);
         if (tag != "Mob")
             Debug.LogWarning(gameObject.ToString() + "'s tag is not set to Mob!");
+        if (transform.FindChild("_selectedTransform") == null)
+            Debug.LogWarning(gameObject.ToString() + " does not have a select transform!");
         if (gameObject.layer != 11)
             Debug.LogWarning(gameObject.ToString() + "'s layer is not set to Object!");
         if (transform.FindChild("_lineOfSight") == null)
@@ -427,13 +429,12 @@ public abstract class Mob : ActiveEntity
     {
         // Set Killed Animation
         Animator.SetTrigger("Died");
-        
+
     }
 
     public override void PerformAction(PerformActionEvent actionEvent)
     {
         base.PerformAction(actionEvent);
-
         // Avoid trying to set commands on self
         if (actionEvent.entity == this)
             return;
@@ -480,7 +481,7 @@ public abstract class Mob : ActiveEntity
     /// Mob specific method which executes a given action only after the elapsed amount of time relative to the mobs
     /// action speed has passed since a last action was executed. This method may be subject to change but in the games current
     /// state this will remain mob specific
-     /// </summary>
+    /// </summary>
     protected bool ExecuteAction(Action action)
     {
         if (Time.time - _lastActionTime > skills.actionSpeed)
@@ -530,7 +531,7 @@ public abstract class Mob : ActiveEntity
         enemies.Remove(data.entity.GetComponent<ActiveEntity>());
     }
 
-#endregion
+    #endregion
 
 }
 

@@ -4,9 +4,13 @@ using System.Collections;
 public class SkeletonMob : Mob
 {
 
+    public float maxWanderRange = 25f;
+    float _wanderDelay;
+
     // Use this for initialization
     void Start()
     {
+        _wanderDelay = Time.time;
         FactionFlags = global::FactionFlags.two;
         EnemyFlags = global::FactionFlags.one & global::FactionFlags.three;
         MobName = "Skelly";
@@ -28,6 +32,15 @@ public class SkeletonMob : Mob
                     Attack(ActionEntity, skills.attackPower);
                 }
                 break;
+            case ActivityState.None:
+                //Find a new coord and move there
+                if (Time.time - _wanderDelay > 5)
+                {
+                    _wanderDelay = Time.time;
+                    AIPath.targetCoord = transform.position + new Vector3(Mathf.Sin(Random.Range(0, 360)) * maxWanderRange, 0, Mathf.Cos(Random.Range(0, 360)) * maxWanderRange);  
+                }
+                break;
+
         }
     }
 

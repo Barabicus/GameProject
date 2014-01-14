@@ -13,7 +13,7 @@ public class DebugMob : Mob {
         FactionFlags = global::FactionFlags.one;
         EnemyFlags = global::FactionFlags.two;
         MobAbiltiyFlags = MobAbiltiyFlags | MobFlags.CanBuild | MobFlags.CanWoodcut;
-        Weapon.ChangeWeapon(WeaponGroup.WeaponType.Sword, 0, WeaponHand.Right);
+       // Weapon.ChangeWeapon(WeaponGroup.WeaponType.Sword, 0, WeaponHand.Right);
         base.Start();
 
     }
@@ -36,7 +36,8 @@ public class DebugMob : Mob {
                     {
                         if(ActionTransform.GetComponent<WorldResource>().CanHarvest(MobAbiltiyFlags))
                             TryPerformAction(new PerformActionEvent(this, tag, new int[]{1}), ActionEntity);
-                        Debug.Log(Resource);
+                        Animator.SetTrigger("chopWood");
+                        Debug.Log("R: " + Resource);
                     }
                     break;
                 case ActivityState.Building:

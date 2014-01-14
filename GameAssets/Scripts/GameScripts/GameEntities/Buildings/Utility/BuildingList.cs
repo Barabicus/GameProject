@@ -68,8 +68,6 @@ public class BuildingList : MonoBehaviour
                 // Also Loop through the prefabs and create all children but only attach renderes and set the
                 // shader to the construction shader so the preview prefab appears completely like a preview.
                 GameObject g = new GameObject("previewPrefab_" + buildings[i].name);
-                g.tag = "BluePrint";
-                g.layer = 11;
                 g.AddComponent<BuildingInfo>();
                 g.AddComponent<DynamicGridObstacle>();
                 g.GetComponent<BuildingInfo>().CopyFromOther(buildings[i].GetComponent<BuildingInfo>());
@@ -94,6 +92,8 @@ public class BuildingList : MonoBehaviour
     /// <param name="obj"></param>
     private void ConstructPreviewPrefab(GameObject blueprint, GameObject obj)
     {
+        obj.tag = "BluePrint";
+        obj.layer = 11;
         // Set the transform properties first
         obj.transform.position = blueprint.transform.position;
         obj.transform.rotation = blueprint.transform.rotation;

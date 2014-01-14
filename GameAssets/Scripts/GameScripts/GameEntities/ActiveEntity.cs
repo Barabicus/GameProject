@@ -10,8 +10,9 @@ public abstract class ActiveEntity : GameEntity, IDamageable, IFactionFlag
 
     protected List<ActiveEntity> enemies = new List<ActiveEntity>();
     private bool _isSelected;
-    public  string EntityID = "MISSINGNO";
-
+    private HighlightableObject _ho;
+    public string EntityID = "MISSINGNO";
+    private bool _isHightlightable = true;
 
     #endregion
 
@@ -26,10 +27,33 @@ public abstract class ActiveEntity : GameEntity, IDamageable, IFactionFlag
         get { return _isSelected; }
         set { _isSelected = value; }
     }
+    public HighlightableObject ObjectHighlight
+    {
+        get { return _ho; }
+    }
+    public bool IsHighlightable
+    {
+        get { return _isHightlightable; }
+        set { _isHightlightable = value; }
+    }
     #endregion
 
     protected virtual void Start()
     {
+        gameObject.AddComponent<HighlightableObject>();
+        _ho = gameObject.GetComponent<HighlightableObject>();
+    }
+
+
+    public void OnMouseEnter()
+    {
+        if (IsHighlightable)
+            _ho.ConstantOn(Color.red);
+    }
+
+    public void OnMouseExit()
+    {
+        _ho.ConstantOff();
     }
 
     public abstract bool Damage(int damage);

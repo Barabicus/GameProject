@@ -18,7 +18,6 @@ public class WorldResource : ActiveEntity
     /// </summary>
     public float regenTime = 1;
     public int regenAmount = 0;
-    public Animation dyingAnimation;
 
     private float _timeCount = 0;
     private ResourceState _resourceState = ResourceState.Active;

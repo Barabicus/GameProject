@@ -78,7 +78,7 @@ public class SelectController : Controller
         if (_selectState == SelectState.Building || _selectState == SelectState.Mob)
         {
             #region Move
-            if (_selectState == SelectState.Mob && Input.GetMouseButtonDown(1))
+            if (Input.GetMouseButtonDown(1))
             {
                 RaycastHit hit;
                 if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity))

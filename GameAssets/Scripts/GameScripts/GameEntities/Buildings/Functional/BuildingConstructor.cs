@@ -55,6 +55,8 @@ public class BuildingConstructor : ActiveEntity
 
     // Use this for initialization
 	void Start () {
+        base.Start();
+        IsHighlightable = false;
         name = GetComponent<BuildingInfo>().BuildingName;
         requiredBuildUnits = GetComponent<BuildingInfo>().RequiredBuildUnits;
 	}

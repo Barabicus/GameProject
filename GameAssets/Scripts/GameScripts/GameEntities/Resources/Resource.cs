@@ -75,14 +75,27 @@ public class Resource : MonoBehaviour
     /// <returns></returns>
     public int AddResource(ResourceType type, int amount)
     {
+        // Calculate how many of this resource we are adding by getting the weight
+        // Add to the current weight the amount of all the items being stored
         _currentWeight += amount * ResourceWeight[type];
+        // If the weight is in excessive, amount will be greater than 0 
+        // Else amount will be zero for all items stored
         int leftOver = Mathf.Max(_currentWeight - maxWeight, 0);
+        // Subtract either the excess or nothing at all
         _currentWeight -= leftOver;
+
+        //Actually store the items
+        // If Left over is equal to zero, store all items
+        // Else Divide left over by the weight and subtract from amount
+        // Only storing the items we have room for
+        _currentResources[type] += leftOver == 0 ? amount : amount - (leftOver / ResourceWeight[type]);
+
         // Fire Changed event to notify of resource change and it's new current amount within this Resource object
         if (ResourceChanged != null)
             ResourceChanged(type, _currentResources[type]);
-        return leftOver;
+        return leftOver / ResourceWeight[type];
     }
+
 
     public override string ToString()
     {
