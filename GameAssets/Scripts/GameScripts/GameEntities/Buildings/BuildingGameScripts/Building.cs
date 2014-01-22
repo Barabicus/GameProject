@@ -11,13 +11,7 @@ public class Building : ActiveEntity
     #region Fields
     public int maxHP;
 
-    /// <summary>
-    /// Time in milliseconds it takes to destory this building.
-    /// This variable is affected directly when a building is destroyed.
-    /// Meaning there is no other sub variable such as currentDestroyTime
-    /// 2.5 seconds by default
-    /// </summary>
-    public float destroyTime = 2500;
+    public bool isInvincible = false;
 
     protected int currentHP;
     public BuildState buildState = BuildState.Constructed;
@@ -61,7 +55,6 @@ public class Building : ActiveEntity
     public enum BuildState
     {
         Constructed,
-        Destroying,
         Destroyed
     }
 
@@ -100,7 +93,10 @@ public class Building : ActiveEntity
             currentHP = Math.Max(currentHP - damage, 0);
             if (currentHP == 0)
             {
-                buildState = BuildState.Destroying;
+                buildState = BuildState.Destroyed;
+                // Trigger Destroyed events
+                if (Destroyed != null)
+                    Destroyed();
                 return false;
             }
             return true;
@@ -116,17 +112,6 @@ public class Building : ActiveEntity
         if (buildState == BuildState.Constructed)
         {
             Tick();
-        }
-        else if (buildState == BuildState.Destroying)
-        {
-            // Advance destroyed progression
-            destroyTime = Mathf.Max(destroyTime - Time.deltaTime, 0f);
-            if (destroyTime == 0)
-            {
-                buildState = BuildState.Destroyed;
-                if(Destroyed != null)
-                Destroyed();
-            }
         }
     }
 

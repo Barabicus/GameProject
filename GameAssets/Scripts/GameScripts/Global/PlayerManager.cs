@@ -8,8 +8,6 @@ public class PlayerManager : MonoBehaviour
     #region Fields
     private int _lifeForce = 0;
     private int _maxLifeForce = 5000;
-    private int _currentPop = 0;
-    private int _maxPop = 8;
     private float _lastTimeForceTick;
     private static PlayerManager _instance;
 

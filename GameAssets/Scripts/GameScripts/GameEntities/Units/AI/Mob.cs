@@ -75,6 +75,7 @@ public abstract class Mob : ActiveEntity
     private float _dyingTime = 0.0f;
     private float _lastActionTime = 0.0f;
     private Transform _healthPivot;
+    private CityManager _homeCity;
 
     #endregion
 
@@ -105,7 +106,11 @@ public abstract class Mob : ActiveEntity
             _enemyFlags = value;
         }
     }
-
+    public CityManager HomeCity
+    {
+        get { return _homeCity; }
+        set { _homeCity = value; }
+    }
     public AIPath AIPath
     {
         get { return _aiPath; }
