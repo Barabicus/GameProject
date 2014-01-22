@@ -34,10 +34,6 @@ public class NGUIgui : MonoBehaviour
         _stateCont = StateController.Instance;
         // Set the select controller to selection initially
         _stateCont.ControllerState = ControllerState.Selection;
-        // and set the select type to mob
-        _stateCont.GetController<SelectController>().ControllerSelectType = SelectController.SelectState.Mob;
-
-
         for (int i = 0; i < BuildingList.Instance.buildings.Length; i++)
         {
             Transform t = Instantiate(buildingGridPrefab) as Transform;
@@ -72,27 +68,6 @@ public class NGUIgui : MonoBehaviour
 
 
     #region SelectionNav
-
-
-    public void ToggleUnit()
-    {
-        if (!UIToggle.current.value)
-            return;
-        _stateCont.GetController<SelectController>().Deselect();
-        _stateCont.GetController<SelectController>().ControllerSelectType = SelectController.SelectState.Mob;
-        _stateCont.ControllerState = ControllerState.Selection;
-        _typeState = TypeState.Mob;
-    }
-
-    public void ToggleBuilding()
-    {
-        if (!UIToggle.current.value)
-            return;
-        _stateCont.GetController<SelectController>().Deselect();
-        _stateCont.GetController<SelectController>().ControllerSelectType = SelectController.SelectState.Building;
-        _stateCont.ControllerState = ControllerState.Selection;
-        _typeState = TypeState.Building;
-    }
 
     #endregion
 

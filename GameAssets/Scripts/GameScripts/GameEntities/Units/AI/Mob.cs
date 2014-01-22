@@ -131,7 +131,7 @@ public abstract class Mob : ActiveEntity
         set
         {
             base.isSelected = value;
-            _selectedTransform.gameObject.SetActive(value);
+                _selectedTransform.gameObject.SetActive(isSelected);
         }
     }
     public MobSkills Skills

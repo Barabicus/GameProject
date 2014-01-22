@@ -13,6 +13,7 @@ public abstract class ActiveEntity : GameEntity, IDamageable, IFactionFlag
     private HighlightableObject _ho;
     public string EntityID = "MISSINGNO";
     private bool _isHightlightable = true;
+    private bool _isSelectable = true;
 
     #endregion
 
@@ -25,7 +26,11 @@ public abstract class ActiveEntity : GameEntity, IDamageable, IFactionFlag
     public virtual bool isSelected
     {
         get { return _isSelected; }
-        set { _isSelected = value; }
+        set
+        {
+            if (IsSelectable)
+                _isSelected = value;
+        }
     }
     public HighlightableObject ObjectHighlight
     {
@@ -35,6 +40,11 @@ public abstract class ActiveEntity : GameEntity, IDamageable, IFactionFlag
     {
         get { return _isHightlightable; }
         set { _isHightlightable = value; }
+    }
+    public bool IsSelectable
+    {
+        get { return _isSelectable; }
+        set { _isSelectable = value; }
     }
     #endregion
 

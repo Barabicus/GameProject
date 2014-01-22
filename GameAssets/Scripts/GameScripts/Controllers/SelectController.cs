@@ -14,7 +14,6 @@ public class SelectController : Controller
 
     private Vector3 _clickPos = Vector3.zero;
     private Vector3 _dragSize = Vector3.zero;
-    private SelectState _selectState = SelectState.Off;
     private DrawState _drawState = DrawState.Off;
     private Texture2D _outlineTexture;
     /// <summary>
@@ -30,11 +29,6 @@ public class SelectController : Controller
     #endregion
 
     #region Properties
-    public SelectState ControllerSelectType
-    {
-        get { return _selectState; }
-        set { _selectState = value; }
-    }
     public FactionFlags PlayerSelectionFlags
     {
         get { return _playerSelectionFlags; }
@@ -43,13 +37,6 @@ public class SelectController : Controller
     #endregion
 
     #region States
-
-    public enum SelectState
-    {
-        Off,
-        Mob,
-        Building
-    }
 
     enum DrawState
     {
@@ -75,21 +62,17 @@ public class SelectController : Controller
         if (UICamera.hoveredObject)
             return;
         #region Selection
-        if (_selectState == SelectState.Building || _selectState == SelectState.Mob)
-        {
+
             #region Move
             if (Input.GetMouseButtonDown(1))
             {
                 RaycastHit hit;
                 if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity))
                 {
-                    if (_selectState == SelectState.Mob)
-                    {
                         foreach (ActiveEntity t in selectedUnits)
                         {
                             t.PerformAction(new PerformActionEvent(hit.collider.GetComponent<ActiveEntity>() != null ? hit.collider.GetComponent<ActiveEntity>() : null, hit.collider.tag, new Vector3[]{hit.point}));
-                        }
-                    }
+                        }              
 
                 }
             }
@@ -124,11 +107,8 @@ public class SelectController : Controller
                         ActiveEntity ae = hit.collider.GetComponent<ActiveEntity>();
                         if ((ae.FactionFlags & _playerSelectionFlags) == _playerSelectionFlags)
                         {
-                            if ((_selectState == SelectState.Mob && ae.tag.Equals("Mob")) || (_selectState == SelectState.Building && ae.tag.Equals("Building")))
-                            {
                                 selectedUnits.Add(ae);
                                 ae.isSelected = true;
-                            }
                         }
                     }
                 }
@@ -142,11 +122,8 @@ public class SelectController : Controller
                     {
                         if (r.Contains(CoordHelper.RectCoords(Camera.main.WorldToScreenPoint(i.gameObject.transform.position))))
                         {
-                            if ((_selectState == SelectState.Mob && i.tag.Equals("Mob")) || (_selectState == SelectState.Building && i.tag.Equals("Building")))
-                            {
                                 selectedUnits.Add(i.gameObject.GetComponent<ActiveEntity>());
                                 i.gameObject.GetComponent<ActiveEntity>().isSelected = true;
-                            }
                         }
                     }
                 }
@@ -155,7 +132,7 @@ public class SelectController : Controller
                 if (SelectedListChanged != null)
                     SelectedListChanged(selectedUnits);
             }
-        }
+        
         #endregion
     }
 
