@@ -13,6 +13,7 @@ public class SimpleMobAI : AIPath {
         }
         set
         {
+            Debug.Log("set target");
             if (value == null)
             {
                 base.target = null;
@@ -20,7 +21,7 @@ public class SimpleMobAI : AIPath {
             }
             Vector3 heading = value.transform.position - transform.position;
             heading.Normalize();
-            targetCoord = value.transform.position - heading * endReachedDistance;
+            targetCoord = value.transform.position - heading * (endReachedDistance);
         }
     }
 

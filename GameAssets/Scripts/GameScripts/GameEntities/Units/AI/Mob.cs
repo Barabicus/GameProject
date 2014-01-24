@@ -68,14 +68,9 @@ public abstract class Mob : ActiveEntity
     private float _attackTime = 0f;
     private string _mobName = "undefined";
     private LocomotionState _locomotionState = LocomotionState.Idle;
-    /// <summary>
-    /// Time it takes to recognize a mob is dead. I.e the dying state.
-    /// </summary>
-    protected float deathTime = 0.45f;
-    private float _dyingTime = 0.0f;
     private float _lastActionTime = 0.0f;
     private Transform _healthPivot;
-    private CityManager _homeCity;
+    private House _house;
 
     #endregion
 
@@ -106,10 +101,10 @@ public abstract class Mob : ActiveEntity
             _enemyFlags = value;
         }
     }
-    public CityManager HomeCity
+    public House House
     {
-        get { return _homeCity; }
-        set { _homeCity = value; }
+        get { return _house; }
+        set { _house = value; }
     }
     public AIPath AIPath
     {
@@ -208,17 +203,13 @@ public abstract class Mob : ActiveEntity
         {
             switch (value)
             {
-                case LivingState.Dying:
-                    //Disable AI Path to prevent movement
+                case LivingState.Dead:
                     AIPath.enabled = false;
-                    //Remove all enemies and reset entity flags
                     enemies.Clear();
                     FactionFlags = global::FactionFlags.None;
                     EnemyFlags = global::FactionFlags.None;
                     SelectableList.RemoveSelectableEntity(this);
                     isSelected = false;
-                    break;
-                case LivingState.Dead:
                     // Fire dead events
                     if (Killed != null)
                         Killed(this, new EventArgs());
@@ -259,7 +250,6 @@ public abstract class Mob : ActiveEntity
     public enum LivingState
     {
         Alive,
-        Dying,
         Dead
     }
 
@@ -349,9 +339,6 @@ public abstract class Mob : ActiveEntity
             case LivingState.Dead:
                 DeadUpdate();
                 break;
-            case LivingState.Dying:
-                DyingUpdate();
-                break;
         }
     }
 
@@ -359,15 +346,6 @@ public abstract class Mob : ActiveEntity
     {
         _attackTime = Math.Max(_attackTime - Time.deltaTime, 0);
 
-    }
-    protected virtual void DyingUpdate()
-    {
-        _dyingTime = Mathf.Min(_dyingTime + Time.deltaTime, deathTime);
-        if (_dyingTime == deathTime)
-        {
-            MobLivingState = LivingState.Dead;
-            return;
-        }
     }
     protected virtual void DeadUpdate() { }
 
@@ -415,7 +393,7 @@ public abstract class Mob : ActiveEntity
             Hp = Math.Max(Hp - damage, 0);
             if (Hp == 0)
             {
-                MobLivingState = LivingState.Dying;
+                MobLivingState = LivingState.Dead;
                 return false;
             }
             return true;

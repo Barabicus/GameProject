@@ -6,6 +6,9 @@ public class PlayerManager : MonoBehaviour
 {
 
     #region Fields
+    public int maxPopulation = 5;
+
+    private int _currentPopulation = 0;
     private int _lifeForce = 0;
     private int _maxLifeForce = 5000;
     private float _lastTimeForceTick;
@@ -22,6 +25,14 @@ public class PlayerManager : MonoBehaviour
         {
             _instance = value;
         }
+    }
+    public int CurrentPopulation
+    {
+        get { return _currentPopulation; }
+    }
+    public int MaxPopulation
+    {
+        get { return maxPopulation; }
     }
     public int LifeForce { get { return _lifeForce; } }
     public string LifeForceParsed
@@ -43,6 +54,24 @@ public class PlayerManager : MonoBehaviour
         Instance = this;
         _lastTimeForceTick = Time.time;
 	}
+
+    /// <summary>
+    /// Spawns a monster with the given ID. ID is in reference to a MonsterList instance.
+    /// </summary>
+    /// <param name="id"></param>
+    /// <returns></returns>
+    public void SpawnMonster(int id, Transform spawnPoint, ParticleSystem[] spawnParticles)
+    {
+        // Don't spawn if our population is too great
+        if (_currentPopulation >= maxPopulation)
+            return;
+        _currentPopulation++;
+        Mob m = Instantiate(MonsterList.Instance.Monsters[id], spawnPoint.position, spawnPoint.rotation) as Mob;
+        foreach (ParticleSystem ps in spawnParticles)
+        {
+            Instantiate(ps, spawnPoint.position, Quaternion.Euler(new Vector3(90, 0, 0)));
+        }
+    }
 	
 	// Update is called once per frame
 	void Update () {

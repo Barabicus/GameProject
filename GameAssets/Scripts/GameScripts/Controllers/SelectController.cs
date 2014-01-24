@@ -122,8 +122,11 @@ public class SelectController : Controller
                     {
                         if (r.Contains(CoordHelper.RectCoords(Camera.main.WorldToScreenPoint(i.gameObject.transform.position))))
                         {
-                                selectedUnits.Add(i.gameObject.GetComponent<ActiveEntity>());
+                            ActiveEntity ae = i.gameObject.GetComponent<ActiveEntity>();
+                            if((ae.FactionFlags & _playerSelectionFlags) == _playerSelectionFlags){
+                                selectedUnits.Add(ae);
                                 i.gameObject.GetComponent<ActiveEntity>().isSelected = true;
+                            }
                         }
                     }
                 }

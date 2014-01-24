@@ -11,17 +11,25 @@ public class BuildingList : MonoBehaviour
     public List<Type> acceptedComponents = new List<Type>();
     public Material ConstructionMaterial;
 
-    Transform[] _buildMeshPrefabs;
+    Transform[] _buildBlueprintPrefabs;
+    Transform[] _buildPreviewPrefabs;
 
     /// <summary>
-    /// Game Objects that were created from the builing prefabs but have every, but mesh components stripped.
-    /// Used for previewing buildings. This should be used as a pooled instance list.
+    /// Game Objects that were created from the builing prefabs but have every component but essential blueprint components stripped.
     /// </summary>
-    public Transform[] BuildingMeshPreviewPrefabs { get { return _buildMeshPrefabs; } }
+    public Transform[] BuildingBlueprintPrefabs { get { return _buildBlueprintPrefabs; } }
+
+    public Transform[] BuildingPreviewPrefabs { get { return _buildPreviewPrefabs; } }
 
     private static BuildingList _instance;
 
     #endregion
+
+    enum BuildingType
+    {
+        Preview,
+        Blueprint
+    }
 
     #region Properties
 
@@ -41,7 +49,8 @@ public class BuildingList : MonoBehaviour
     #endregion
 
     // Use this for initialization
-	void Awake () {
+    void Awake()
+    {
         if (_instance != null)
         {
             Debug.LogWarning("Building Instance was not null!");
@@ -52,14 +61,16 @@ public class BuildingList : MonoBehaviour
         {
             _instance = this;
 
-            //  Accepted components when constructing the preview prefab.
+            // Generate BuildingMeshPrefabs
+            _buildBlueprintPrefabs = new Transform[buildings.Length];
+            _buildPreviewPrefabs = new Transform[buildings.Length];
+
+            //  Accepted components when constructing the blueprint prefab.
             acceptedComponents.Add(typeof(MeshFilter));
             acceptedComponents.Add(typeof(MeshRenderer));
             acceptedComponents.Add(typeof(BoxCollider));
             acceptedComponents.Add(typeof(MeshCollider));
 
-            // Generate BuildingMeshPrefabs
-            _buildMeshPrefabs = new Transform[buildings.Length];
             for (int i = 0; i < buildings.Length; i++)
             {
                 // Create a new gameobject to use as per the object preview. 
@@ -67,19 +78,30 @@ public class BuildingList : MonoBehaviour
                 // script that exists on the prefab.
                 // Also Loop through the prefabs and create all children but only attach renderes and set the
                 // shader to the construction shader so the preview prefab appears completely like a preview.
-                GameObject g = new GameObject("previewPrefab_" + buildings[i].name);
+                GameObject g = new GameObject("blueprintPrefab_" + buildings[i].name);
                 g.AddComponent<BuildingInfo>();
                 g.AddComponent<DynamicGridObstacle>();
                 g.GetComponent<BuildingInfo>().CopyFromOther(buildings[i].GetComponent<BuildingInfo>());
                 g.AddComponent<BuildingConstructor>();
                 g.GetComponent<BuildingConstructor>().ConstructedPrefab = buildings[i].transform;
-                ConstructPreviewPrefab(buildings[i].gameObject, g);
+                ConstructPreviewPrefab(buildings[i].gameObject, g, BuildingType.Blueprint);
                 g.transform.parent = transform;
                 g.SetActive(false);
-                _buildMeshPrefabs[i] = g.transform;
+                _buildBlueprintPrefabs[i] = g.transform;
             }
+
+            for (int i = 0; i < buildings.Length; i++)
+            {
+                GameObject g = new GameObject("previewPrefab_" + buildings[i].name);
+                ConstructPreviewPrefab(buildings[i].gameObject, g, BuildingType.Preview);
+                g.transform.parent = transform;
+                g.SetActive(false);
+                _buildPreviewPrefabs[i] = g.transform;
+
+            }
+
         }
-	}
+    }
 
     /// <summary>
     /// Constructs the preview prefab from a blueprint object. Constructing a gameobject
@@ -90,9 +112,17 @@ public class BuildingList : MonoBehaviour
     /// </summary>
     /// <param name="blueprint"></param>
     /// <param name="obj"></param>
-    private void ConstructPreviewPrefab(GameObject blueprint, GameObject obj)
+    private void ConstructPreviewPrefab(GameObject blueprint, GameObject obj, BuildingType btype)
     {
-        obj.tag = "BluePrint";
+        switch (btype)
+        {
+            case BuildingType.Blueprint:
+                obj.tag = "BluePrint";
+                break;
+            case BuildingType.Preview:
+                obj.tag = "Preview";
+                break;
+        }
         obj.layer = 11;
         // Set the transform properties first
         obj.transform.position = blueprint.transform.position;
@@ -115,10 +145,27 @@ public class BuildingList : MonoBehaviour
                 }
                 else if (comp.GetType() == typeof(MeshCollider))
                 {
+                    switch (btype)
+                    {
+                        case BuildingType.Blueprint:
+                            obj.GetComponent<MeshCollider>().isTrigger = false;
+                            break;
+                        case BuildingType.Preview:
+                            obj.GetComponent<MeshCollider>().isTrigger = true;
+                            break;
+                    }
                 }
                 else if (comp.GetType() == typeof(BoxCollider))
                 {
-
+                    switch (btype)
+                    {
+                        case BuildingType.Blueprint:
+                            obj.GetComponent<BoxCollider>().isTrigger = false;
+                            break;
+                        case BuildingType.Preview:
+                            obj.GetComponent<BoxCollider>().isTrigger = true;
+                            break;
+                    }
                     obj.GetComponent<BoxCollider>().size = blueprint.GetComponent<BoxCollider>().size;
                     obj.GetComponent<BoxCollider>().center = blueprint.GetComponent<BoxCollider>().center;
                 }
@@ -130,9 +177,9 @@ public class BuildingList : MonoBehaviour
         {
             GameObject child = new GameObject(blueprint.transform.GetChild(i).name);
             child.transform.parent = obj.transform;
-            ConstructPreviewPrefab(blueprint.transform.GetChild(i).gameObject, child);
+            ConstructPreviewPrefab(blueprint.transform.GetChild(i).gameObject, child, btype);
         }
 
     }
-	
+
 }

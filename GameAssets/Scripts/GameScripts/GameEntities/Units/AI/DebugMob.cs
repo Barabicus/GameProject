@@ -37,11 +37,10 @@ public class DebugMob : Mob {
                         if(ActionTransform.GetComponent<WorldResource>().CanHarvest(MobAbiltiyFlags))
                             TryPerformAction(new PerformActionEvent(this, tag, new int[]{1}), ActionEntity);
                         Animator.SetTrigger("chopWood");
-                        Debug.Log("R: " + Resource);
                     }
                     break;
                 case ActivityState.Building:
-                    if (distanceToTarget() < 5f)
+                    if (distanceToTarget() < 15f)
                     {
                         TryPerformAction(new PerformActionEvent(this, tag), ActionEntity);
                     }

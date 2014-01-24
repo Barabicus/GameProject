@@ -2,7 +2,6 @@
 using System.Collections;
 using System;
 
-[RequireComponent(typeof(ShowRim))]
 [RequireComponent(typeof(BuildingInfo))]
 [RequireComponent(typeof(DynamicGridObstacle))]
 public class Building : ActiveEntity
@@ -65,15 +64,12 @@ public class Building : ActiveEntity
     void Awake()
     {
         base.Awake();
-        GetComponent<ShowRim>().enabled = false;
     }
 
     void Start()
     {
         base.Start();
         SelectableList.AddSelectableEntity(this);
-        if (GetComponent<ShowRim>().enabled)
-            Debug.LogError(gameObject.ToString() + "'s showrim should be disabled intially");
     }
 
     #endregion
