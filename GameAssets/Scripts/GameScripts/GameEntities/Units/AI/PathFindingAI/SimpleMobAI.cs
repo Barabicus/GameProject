@@ -13,7 +13,6 @@ public class SimpleMobAI : AIPath {
         }
         set
         {
-            Debug.Log("set target");
             if (value == null)
             {
                 base.target = null;

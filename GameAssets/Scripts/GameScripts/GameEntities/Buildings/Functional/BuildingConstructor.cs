@@ -87,7 +87,6 @@ public class BuildingConstructor : ActiveEntity
     public override void PerformAction(PerformActionEvent actionEvent)
     {
         base.PerformAction(actionEvent);
-        Debug.Log("performAction");
         if (actionEvent.tag == "Mob")
         {
             Mob mob = actionEvent.entity.GetComponent<Mob>();

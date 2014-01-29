@@ -8,21 +8,21 @@ public class RTSCamera : MonoBehaviour
     #region Fields
 
     public Texture cloudTexture;
-    public float startCloudsAtHeightPercent = 80f;
-    public float cloudMaxAlpha = 1f;
-    public float speed = 2.5f;
-    public float zoomSpeed = 2.0f;
-    public float zoomLerpSpeed = 5.0f;
-    public float rotateSpeed = 1.0f;
-    public float minHeightDistance;
-    public float tiltMaxHeight = 60f;
-    public float lowTilt;
-    public float highTilt;
-    public float maxHeight = 100f;
+    public float startCloudsAtHeightPercent = 90f;
+    public float cloudMaxAlpha = 0.15f;
+    public float speed = 45f;
+    public float zoomSpeed = 1f;
+    public float zoomLerpSpeed = 5f;
+    public float rotateSpeed = 180.0f;
+    public float minHeightDistance = 5f;
+    public float tiltMaxHeight = 110f;
+    public float lowTilt = 15f;
+    public float highTilt = 60f;
+    public float maxHeight = 125f;
     public float UnitViewHeightAddition = 10f;
-    public float minimumY = -60F;
-    public float maximumY = 60F;
-    public CameraState _state = CameraState.UnitView;
+    public float minimumY = -40F;
+    public float maximumY = 80F;
+    public CameraState _state = CameraState.WorldView;
 
     private float rotationY;
     private float newHeight;

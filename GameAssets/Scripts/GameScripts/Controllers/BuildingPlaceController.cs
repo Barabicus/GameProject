@@ -10,7 +10,8 @@ public class BuildingPlaceController : Controller
     #region Fields
 
     public int placeDistance = 500;
-    public float rotateSpeed = 5f;
+    public Color canPlaceColor;
+    public Color cantPlaceColor;
 
     /// <summary>
     /// The transform for the preview building.
@@ -19,6 +20,12 @@ public class BuildingPlaceController : Controller
     private Transform _buildingPreview;
     private Vector3 _placePosition = Vector3.zero;
     private PlaceType _placeType = PlaceType.Single;
+    private int _colliders = 0;
+    /// <summary>
+    /// Reference to the material color changer that will be used to change the color of all objects 
+    /// associated with the preview building.
+    /// </summary>
+    private MaterialColorChanger _matColorChanger;
 
     #endregion
 
@@ -41,10 +48,13 @@ public class BuildingPlaceController : Controller
         get { return _buildingPreview; }
         set
         {
+            _colliders = 0;
             _buildingPreview.gameObject.SetActive(false);
             _buildingPreview.transform.rotation = Quaternion.identity;
             _buildingPreview.position = Vector3.zero;
             _buildingPreview = value;
+            _matColorChanger = value.GetComponent<MaterialColorChanger>();
+            _matColorChanger.ChangeColor(canPlaceColor);
         }
     }
 
@@ -73,6 +83,19 @@ public class BuildingPlaceController : Controller
     {
         BuildingPreview.gameObject.SetActive(false);
     }
+
+
+    public void OtherTriggerEnter(Collider other)
+    {
+        if (!other.tag.Equals("Ground"))
+            _colliders++;
+    }
+
+    public void OtherTriggerExit(Collider other)
+    {
+        if (!other.tag.Equals("Ground"))
+            _colliders--;
+    }
 	
 	void Update () {
             // If the mouse is over an UI element, don't show the place transform
@@ -82,11 +105,18 @@ public class BuildingPlaceController : Controller
             }
             else
             {
+                if (_colliders > 0)
+                {
+                    _matColorChanger.ChangeColor(cantPlaceColor);
+                }
+                else
+                {
+                    _matColorChanger.ChangeColor(canPlaceColor);
+                }
                 RaycastHit hit;
                 // If the mouse if over the terrain
                 if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, placeDistance, 1 << 9))
                 {
-
                     BuildingPreview.gameObject.SetActive(true);
                     BuildingPreview.position = hit.point;
                     if (Input.GetMouseButtonDown(0))

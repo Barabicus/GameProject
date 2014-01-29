@@ -73,11 +73,9 @@ public class BuildingList : MonoBehaviour
 
             for (int i = 0; i < buildings.Length; i++)
             {
-                // Create a new gameobject to use as per the object preview. 
-                // Attatch and identical BuildingInfo script to it via the building info
-                // script that exists on the prefab.
-                // Also Loop through the prefabs and create all children but only attach renderes and set the
-                // shader to the construction shader so the preview prefab appears completely like a preview.
+                //Create prefabs of all the buildings that will act as the blueprint.
+                // The blueprint is the building that exists in game but is not yet built
+                // and will appear as a green transparent structure on the map.
                 GameObject g = new GameObject("blueprintPrefab_" + buildings[i].name);
                 g.AddComponent<BuildingInfo>();
                 g.AddComponent<DynamicGridObstacle>();
@@ -92,8 +90,16 @@ public class BuildingList : MonoBehaviour
 
             for (int i = 0; i < buildings.Length; i++)
             {
+                // Create prefabs for the preview buildings. Like a blueprint except it is
+                // dragged around on the map by the player until the player actually places it 
+                // somewhere in which a blueprint in initialized. The preview building
+                // is used to show that player what he is placing and how he is placing.
                 GameObject g = new GameObject("previewPrefab_" + buildings[i].name);
-                ConstructPreviewPrefab(buildings[i].gameObject, g, BuildingType.Preview);
+                g.AddComponent<Rigidbody>();
+                g.AddComponent<MaterialColorChanger>();
+                g.GetComponent<Rigidbody>().isKinematic = true;
+                g.AddComponent<TriggerListener>();
+                ConstructPreviewPrefab(buildings[i].gameObject, g, BuildingType.Preview, g.GetComponent<MaterialColorChanger>());
                 g.transform.parent = transform;
                 g.SetActive(false);
                 _buildPreviewPrefabs[i] = g.transform;
@@ -101,6 +107,11 @@ public class BuildingList : MonoBehaviour
             }
 
         }
+    }
+
+    private void ConstructPreviewPrefab(GameObject blueprint, GameObject obj, BuildingType btype)
+    {
+        ConstructPreviewPrefab(blueprint, obj, btype, null);
     }
 
     /// <summary>
@@ -112,23 +123,8 @@ public class BuildingList : MonoBehaviour
     /// </summary>
     /// <param name="blueprint"></param>
     /// <param name="obj"></param>
-    private void ConstructPreviewPrefab(GameObject blueprint, GameObject obj, BuildingType btype)
+    private void ConstructPreviewPrefab(GameObject blueprint, GameObject obj, BuildingType btype, MaterialColorChanger mColorChanger)
     {
-        switch (btype)
-        {
-            case BuildingType.Blueprint:
-                obj.tag = "BluePrint";
-                break;
-            case BuildingType.Preview:
-                obj.tag = "Preview";
-                break;
-        }
-        obj.layer = 11;
-        // Set the transform properties first
-        obj.transform.position = blueprint.transform.position;
-        obj.transform.rotation = blueprint.transform.rotation;
-        obj.transform.localScale = blueprint.transform.localScale;
-
         // Add components
         foreach (Component comp in blueprint.GetComponents<Component>())
         {
@@ -172,12 +168,56 @@ public class BuildingList : MonoBehaviour
 
             }
         }
+
+        if (mColorChanger != null)
+        {
+            if (mColorChanger == null)
+            {
+                Debug.LogError("MaterialColorChanger can not be null for blueprint type!");
+            }
+
+            if (obj.renderer != null)
+            {
+                if (obj.renderer.material != null)
+                {
+                    // Add this material to the parent transforms color changer
+                    mColorChanger.ColorChanged += (c) =>
+                    {
+                        obj.renderer.material.color = c;
+                    };
+                }
+            }
+
+        }
+
+        switch (btype)
+        {
+            case BuildingType.Blueprint:
+                obj.tag = "BluePrint";
+                break;
+            case BuildingType.Preview:
+                obj.tag = "Preview";
+                break;
+        }
+        obj.layer = 11;
+        obj.transform.position = blueprint.transform.position;
+        obj.transform.rotation = blueprint.transform.rotation;
+        obj.transform.localScale = blueprint.transform.localScale;
+
         // Add Sub Objects
         for (int i = 0; i < blueprint.transform.childCount; i++)
         {
             GameObject child = new GameObject(blueprint.transform.GetChild(i).name);
             child.transform.parent = obj.transform;
-            ConstructPreviewPrefab(blueprint.transform.GetChild(i).gameObject, child, btype);
+            switch (btype)
+            {
+                case BuildingType.Blueprint:
+                    ConstructPreviewPrefab(blueprint.transform.GetChild(i).gameObject, child, btype);
+                    break;
+                case BuildingType.Preview:
+                    ConstructPreviewPrefab(blueprint.transform.GetChild(i).gameObject, child, btype, mColorChanger);
+                    break;
+            }
         }
 
     }
