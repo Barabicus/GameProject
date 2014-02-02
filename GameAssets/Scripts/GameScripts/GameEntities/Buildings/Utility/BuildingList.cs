@@ -78,7 +78,6 @@ public class BuildingList : MonoBehaviour
                 // and will appear as a green transparent structure on the map.
                 GameObject g = new GameObject("blueprintPrefab_" + buildings[i].name);
                 g.AddComponent<BuildingInfo>();
-                g.AddComponent<DynamicGridObstacle>();
                 g.GetComponent<BuildingInfo>().CopyFromOther(buildings[i].GetComponent<BuildingInfo>());
                 g.AddComponent<BuildingConstructor>();
                 g.GetComponent<BuildingConstructor>().ConstructedPrefab = buildings[i].transform;
@@ -99,7 +98,7 @@ public class BuildingList : MonoBehaviour
                 g.AddComponent<MaterialColorChanger>();
                 g.GetComponent<Rigidbody>().isKinematic = true;
                 g.AddComponent<TriggerListener>();
-                ConstructPreviewPrefab(buildings[i].gameObject, g, BuildingType.Preview, g.GetComponent<MaterialColorChanger>());
+                ConstructPreviewPrefab(buildings[i].gameObject, g, BuildingType.Preview, g.transform);
                 g.transform.parent = transform;
                 g.SetActive(false);
                 _buildPreviewPrefabs[i] = g.transform;
@@ -123,7 +122,7 @@ public class BuildingList : MonoBehaviour
     /// </summary>
     /// <param name="blueprint"></param>
     /// <param name="obj"></param>
-    private void ConstructPreviewPrefab(GameObject blueprint, GameObject obj, BuildingType btype, MaterialColorChanger mColorChanger)
+    private void ConstructPreviewPrefab(GameObject blueprint, GameObject obj, BuildingType btype, Transform ParentTransform)
     {
         // Add components
         foreach (Component comp in blueprint.GetComponents<Component>())
@@ -145,6 +144,8 @@ public class BuildingList : MonoBehaviour
                     {
                         case BuildingType.Blueprint:
                             obj.GetComponent<MeshCollider>().isTrigger = false;
+                            if (obj.GetComponent<DynamicGridObstacle>() == null)
+                                obj.AddComponent<DynamicGridObstacle>();
                             break;
                         case BuildingType.Preview:
                             obj.GetComponent<MeshCollider>().isTrigger = true;
@@ -157,6 +158,8 @@ public class BuildingList : MonoBehaviour
                     {
                         case BuildingType.Blueprint:
                             obj.GetComponent<BoxCollider>().isTrigger = false;
+                            if (obj.GetComponent<DynamicGridObstacle>() == null)
+                                obj.AddComponent<DynamicGridObstacle>();
                             break;
                         case BuildingType.Preview:
                             obj.GetComponent<BoxCollider>().isTrigger = true;
@@ -169,19 +172,14 @@ public class BuildingList : MonoBehaviour
             }
         }
 
-        if (mColorChanger != null)
+        if (ParentTransform != null && ParentTransform.GetComponent<MaterialColorChanger>() != null)
         {
-            if (mColorChanger == null)
-            {
-                Debug.LogError("MaterialColorChanger can not be null for blueprint type!");
-            }
-
             if (obj.renderer != null)
             {
                 if (obj.renderer.material != null)
                 {
                     // Add this material to the parent transforms color changer
-                    mColorChanger.ColorChanged += (c) =>
+                    ParentTransform.GetComponent<MaterialColorChanger>().ColorChanged += (c) =>
                     {
                         obj.renderer.material.color = c;
                     };
@@ -215,7 +213,7 @@ public class BuildingList : MonoBehaviour
                     ConstructPreviewPrefab(blueprint.transform.GetChild(i).gameObject, child, btype);
                     break;
                 case BuildingType.Preview:
-                    ConstructPreviewPrefab(blueprint.transform.GetChild(i).gameObject, child, btype, mColorChanger);
+                    ConstructPreviewPrefab(blueprint.transform.GetChild(i).gameObject, child, btype, ParentTransform);
                     break;
             }
         }

@@ -32,7 +32,7 @@ public class DebugMob : Mob {
                     }
                     break;
                 case ActivityState.Woodcutting:
-                    if (distanceToTarget() < 5f)
+                    if (distanceToTarget() < 15f)
                     {
                         if(ActionTransform.GetComponent<WorldResource>().CanHarvest(MobAbiltiyFlags))
                             TryPerformAction(new PerformActionEvent(this, tag, new int[]{1}), ActionEntity);

@@ -21,19 +21,30 @@ public class CityManager : Building
     private Dictionary<ResourceType, int> _cachedResourceNumbers = new Dictionary<ResourceType, int>();
     private Transform _spawnPoint;
     private List<Building> _buildings;
+    private List<Mob> _citizens;
+    /// <summary>
+    /// List of houses that have free space
+    /// </summary>
+    private List<House> _freeHouses;
 
     public ParticleSystem[] spawnParticles;
 
     #endregion
 
     #region Properties
-
+    public List<Mob> Citizens
+    {
+        get { return _citizens; }
+    }
     #endregion
 
     #region Initilization
     void Start()
     {
+        base.Start();
         _buildings = new List<Building>();
+        _citizens = new List<Mob>();
+        _freeHouses = new List<House>();
         _spawnPoint = transform.FindChild("_SpawnPoint");
         if (_spawnPoint == null)
         {
@@ -53,6 +64,35 @@ public class CityManager : Building
     #endregion
 
     #region Logic
+
+    public void AddBuilding(Building building)
+    {
+        _buildings.Add(building);
+        building.CityManager = this;
+        building.Destroyed += RemoveBuilding;
+        if (building.GetType() == typeof(ResourceBuilding))
+        {
+            AddResourceContainer((ResourceBuilding)building);
+        }
+    }
+
+    public void RemoveBuilding(Building building)
+    {
+        if (_buildings.Contains(building))
+        {
+            _buildings.Remove(building);
+        }
+    }
+
+    public void FindHouse(Mob mob)
+    {
+        Debug.Log("Free Houses: " + _freeHouses.Count);
+        if (_freeHouses.Count > 0)
+        {
+            _freeHouses[0].AddResident(mob);
+        }
+    }
+
     public void AddResourceContainer(ResourceBuilding building)
     {
         building.Resource.ResourceChanged += UpdateCachedResources;
@@ -79,7 +119,23 @@ public class CityManager : Building
         base.Update();
         if (Input.GetKeyDown(KeyCode.I))
         {
-            PlayerManager.Instance.SpawnMonster(Random.Range(0, 3), _spawnPoint, spawnParticles);
+        //    Mob m = PlayerManager.Instance.SpawnMonster(Random.Range(0, 3), _spawnPoint, spawnParticles);
+            Mob m = PlayerManager.Instance.SpawnMonster(3, _spawnPoint, spawnParticles);
+            if (m != null)
+            {
+                m.CityManager = this;
+                _citizens.Add(m);
+            }
+        }
+        if (Input.GetKeyDown(KeyCode.O))
+        {
+            //    Mob m = PlayerManager.Instance.SpawnMonster(Random.Range(0, 3), _spawnPoint, spawnParticles);
+            Mob m = PlayerManager.Instance.SpawnMonster(2, _spawnPoint, spawnParticles);
+            if (m != null)
+            {
+                m.CityManager = this;
+                _citizens.Add(m);
+            }
         }
     }
 

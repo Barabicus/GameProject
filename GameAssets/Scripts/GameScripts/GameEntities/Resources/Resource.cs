@@ -31,7 +31,7 @@ public class Resource : MonoBehaviour
     /// <summary>
     /// The current weight that this resource is holding.
     /// </summary>
-    private int _currentWeight = 0;
+    public int _currentWeight = 0;
     #endregion
 
     #region Properties
@@ -64,6 +64,12 @@ public class Resource : MonoBehaviour
 
     #region Logic
 
+    // TO DO
+    public bool HasRoom(Resource type)
+    {
+        return false;
+    }
+
     /// <summary>
     /// Takes a resource type and the amount you want to add in. It stores
     /// all the resources of that type based on how much resources can be held.
@@ -94,6 +100,26 @@ public class Resource : MonoBehaviour
         if (ResourceChanged != null)
             ResourceChanged(type, _currentResources[type]);
         return leftOver / ResourceWeight[type];
+    }
+
+    /// <summary>
+    /// Removes the specified amount of resources from this resource and returns the value that was
+    /// actually removed
+    /// </summary>
+    /// <param name="type"></param>
+    /// <param name="amount"></param>
+    /// <returns></returns>
+    public int RemoveResource(ResourceType type, int amount)
+    {
+        if (amount < 0)
+        {
+            Debug.LogError("Amount should be greater than 0");
+            return 0;
+        }
+        int rtrn = amount > _currentResources[type] ? _currentResources[type] : amount;
+        _currentResources[type] -= rtrn;
+        _currentWeight -= ResourceWeight[type] * rtrn;
+        return rtrn;
     }
 
 

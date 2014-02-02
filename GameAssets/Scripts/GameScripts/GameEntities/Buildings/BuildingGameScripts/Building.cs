@@ -3,7 +3,6 @@ using System.Collections;
 using System;
 
 [RequireComponent(typeof(BuildingInfo))]
-[RequireComponent(typeof(DynamicGridObstacle))]
 public class Building : ActiveEntity
 {
 
@@ -15,16 +14,23 @@ public class Building : ActiveEntity
     protected int currentHP;
     public BuildState buildState = BuildState.Constructed;
 
+    private CityManager _cityManager;
     private FactionFlags _factionFlags = FactionFlags.None;
     private FactionFlags _enemyFlags = FactionFlags.None;
 
     #endregion
 
     #region Events
-    public event Action Destroyed;
+    public delegate void BuildingEvent(Building building);
+    public event BuildingEvent Destroyed;
     #endregion
 
     #region Properties
+    public CityManager CityManager
+    {
+        get { return _cityManager; }
+        set { _cityManager = value; }
+    }
     public override FactionFlags FactionFlags
     {
         get
@@ -70,6 +76,8 @@ public class Building : ActiveEntity
     {
         base.Start();
         SelectableList.AddSelectableEntity(this);
+        // Register with city manager
+        PlayerManager.Instance.cityManager.AddBuilding(this);
     }
 
     #endregion
@@ -92,7 +100,7 @@ public class Building : ActiveEntity
                 buildState = BuildState.Destroyed;
                 // Trigger Destroyed events
                 if (Destroyed != null)
-                    Destroyed();
+                    Destroyed(this);
                 return false;
             }
             return true;

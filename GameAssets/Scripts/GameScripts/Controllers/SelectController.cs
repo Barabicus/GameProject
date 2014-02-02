@@ -67,7 +67,7 @@ public class SelectController : Controller
             if (Input.GetMouseButtonDown(1))
             {
                 RaycastHit hit;
-                if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, Mathf.Infinity))
+                if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition),out hit, Mathf.Infinity, 1 << (9) | 1 << (11)))
                 {
                         foreach (ActiveEntity t in selectedUnits)
                         {

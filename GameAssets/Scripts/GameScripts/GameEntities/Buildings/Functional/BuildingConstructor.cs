@@ -17,6 +17,10 @@ public class BuildingConstructor : ActiveEntity
     protected int currentBuildUnits = 0;
     public Transform ConstructedPrefab;
     private FactionFlags _factionFlags = FactionFlags.None;
+    private ResourceType[] requiredResources;
+    private int[] requiredResourceAmount;
+    private int[] currentResourceAmount;
+    private bool _resourceRequirementMet = false;
 
     #endregion
 
@@ -25,7 +29,10 @@ public class BuildingConstructor : ActiveEntity
     #endregion
 
     #region Properties
-
+    public bool ResourceRequirementMet
+    {
+        get { return _resourceRequirementMet; }
+    }
     public override FactionFlags EnemyFlags
     {
         get
@@ -54,21 +61,26 @@ public class BuildingConstructor : ActiveEntity
     #region Initilization
 
     // Use this for initialization
-	void Start () {
+    void Start()
+    {
         base.Start();
         IsHighlightable = false;
         name = GetComponent<BuildingInfo>().BuildingName;
         requiredBuildUnits = GetComponent<BuildingInfo>().RequiredBuildUnits;
-	}
+        requiredResources = GetComponent<BuildingInfo>().requiredResources;
+        requiredResourceAmount = GetComponent<BuildingInfo>().requiredResourceAmount;
+        currentResourceAmount = new int[requiredResourceAmount.Length];
+    }
 
     #endregion
 
     #region Logic
 
     // Update is called once per frame
-	void Update () {
-	
-	}
+    void Update()
+    {
+
+    }
 
     public override bool Damage(int damage)
     {
@@ -87,12 +99,45 @@ public class BuildingConstructor : ActiveEntity
     public override void PerformAction(PerformActionEvent actionEvent)
     {
         base.PerformAction(actionEvent);
-        if (actionEvent.tag == "Mob")
+        switch (actionEvent.tag)
         {
-            Mob mob = actionEvent.entity.GetComponent<Mob>();
-            // If the mob can build, build
-            if ((mob.MobAbiltiyFlags & Mob.MobFlags.CanBuild) == Mob.MobFlags.CanBuild)
-                Construct(mob.Skills.buildPower);
+            case "Mob":
+                Mob mob = actionEvent.entity.GetComponent<Mob>();
+                switch (mob.CurrentActivity)
+                {
+                    case Mob.ActivityState.Building:
+                        Construct(mob.Skills.buildPower);
+                        break;
+                    case Mob.ActivityState.Supplying:
+                        SupplyResources(mob.Resource);
+                        break;
+                }
+                break;
+        }
+    }
+
+    public void SupplyResources(Resource resource)
+    {
+        if (_resourceRequirementMet)
+            return;
+        // Remove all resources from this container that this building constructor needs to advance.
+        for (int i = 0; i < requiredResources.Length; i++)
+        {
+            if (currentResourceAmount[i] < requiredResourceAmount[i])
+            {
+                currentResourceAmount[i] += resource.RemoveResource(requiredResources[i], (requiredResourceAmount[i] - currentResourceAmount[i]));
+            }
+        }
+
+        // Perform check to see if we have all the required resources
+        _resourceRequirementMet = true;
+        for (int i = 0; i < requiredResources.Length; i++)
+        {
+            if (currentResourceAmount[i] != requiredResourceAmount[i])
+            {
+                _resourceRequirementMet = false;
+                return;
+            }
         }
     }
 
@@ -105,6 +150,8 @@ public class BuildingConstructor : ActiveEntity
     /// i.e is it already constructed, destroying or destroyed</returns>
     public bool Construct(int contributedBuildUnits)
     {
+        if (!_resourceRequirementMet)
+            return false;
         currentBuildUnits += contributedBuildUnits;
 
         if (currentBuildUnits >= requiredBuildUnits)

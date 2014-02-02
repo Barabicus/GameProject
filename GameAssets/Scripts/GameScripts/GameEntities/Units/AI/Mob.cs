@@ -16,7 +16,8 @@ public abstract class Mob : ActiveEntity
 {
 
     #region Events
-    public event EventHandler Killed;
+    public delegate void MobEvent(Mob mob);
+    public event MobEvent Killed;
     #endregion
 
     #region Fields
@@ -71,10 +72,16 @@ public abstract class Mob : ActiveEntity
     private float _lastActionTime = 0.0f;
     private Transform _healthPivot;
     private House _house;
+    private CityManager _cityManager;
 
     #endregion
 
     #region Properties
+    public CityManager CityManager
+    {
+        get { return _cityManager; }
+        set { _cityManager = value; }
+    }
     public override FactionFlags FactionFlags
     {
         get
@@ -131,7 +138,7 @@ public abstract class Mob : ActiveEntity
         set
         {
             base.isSelected = value;
-                _selectedTransform.gameObject.SetActive(isSelected);
+            _selectedTransform.gameObject.SetActive(isSelected);
         }
     }
     public MobSkills Skills
@@ -212,7 +219,7 @@ public abstract class Mob : ActiveEntity
                     isSelected = false;
                     // Fire dead events
                     if (Killed != null)
-                        Killed(this, new EventArgs());
+                        Killed(this);
                     MobKilled();
                     break;
             }
@@ -242,6 +249,7 @@ public abstract class Mob : ActiveEntity
         None,
         Attacking,
         Collecting,
+        Supplying,
         Mining,
         Woodcutting,
         Building
@@ -345,7 +353,10 @@ public abstract class Mob : ActiveEntity
     protected virtual void LivingUpdate()
     {
         _attackTime = Math.Max(_attackTime - Time.deltaTime, 0);
-
+        if (_house == null)
+        {
+            CityManager.FindHouse(this);
+        }
     }
     protected virtual void DeadUpdate() { }
 
@@ -412,7 +423,6 @@ public abstract class Mob : ActiveEntity
     {
         // Set Killed Animation
         Animator.SetTrigger("Died");
-
     }
 
     public override void PerformAction(PerformActionEvent actionEvent)
@@ -443,37 +453,7 @@ public abstract class Mob : ActiveEntity
                     SetEntityAndFollow(actionEvent.entity);
                 }
                 break;
-            case "BluePrint":
-                if (!IsEnemey(actionEvent.entity.FactionFlags) && (MobAbiltiyFlags & MobFlags.CanBuild) == MobFlags.CanBuild)
-                {
-                    CurrentActivity = ActivityState.Building;
-                    SetEntityAndFollow(actionEvent.entity);
-                }
-                break;
-            case "Tree":
-                if ((MobAbiltiyFlags & MobFlags.CanWoodcut) == MobFlags.CanWoodcut)
-                {
-                    CurrentActivity = ActivityState.Woodcutting;
-                    SetEntityAndFollow(actionEvent.entity);
-                }
-                break;
         }
-    }
-
-    /// <summary>
-    /// Mob specific method which executes a given action only after the elapsed amount of time relative to the mobs
-    /// action speed has passed since a last action was executed. This method may be subject to change but in the games current
-    /// state this will remain mob specific
-    /// </summary>
-    protected bool ExecuteAction(Action action)
-    {
-        if (Time.time - _lastActionTime > skills.actionSpeed)
-        {
-            _lastActionTime = Time.time;
-            action();
-            return true;
-        }
-        return false;
     }
 
     #endregion
@@ -530,4 +510,10 @@ public struct MobSkills
     public int buildPower;
     public float buildSpeed;
 
+}
+
+public struct MobNeeds
+{
+    public float hunger;
+    public float tirednes;
 }

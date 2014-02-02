@@ -95,6 +95,7 @@ public class WorldResource : ActiveEntity
             if (!isInfinite && !regenerates && currentAmount == 0)
             {
                 ResourceState = global::ResourceState.Dying;
+                animator.SetTrigger("Dying");
             }
         }
     }
@@ -107,7 +108,7 @@ public class WorldResource : ActiveEntity
             case "Mob":
                 // Harvest the resource for the calling mob 
                 // int parameter passed in should specify the amount required
-                HarvestResource(actionEvent.entity.GetComponent<Mob>().Resource, actionEvent.intArgs[0]);
+                HarvestResource(actionEvent.entity.GetComponent<Mob>().Resource, 1);
                 break;
         }
     }
