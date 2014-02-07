@@ -69,6 +69,7 @@ public class BuildingConstructor : ActiveEntity
         requiredBuildUnits = GetComponent<BuildingInfo>().RequiredBuildUnits;
         requiredResources = GetComponent<BuildingInfo>().requiredResources;
         requiredResourceAmount = GetComponent<BuildingInfo>().requiredResourceAmount;
+        FactionFlags = GetComponent<BuildingInfo>().factionFlags;
         currentResourceAmount = new int[requiredResourceAmount.Length];
     }
 
@@ -166,7 +167,9 @@ public class BuildingConstructor : ActiveEntity
                 Destroy(gameObject);
                 return false;
             }
-            Instantiate(ConstructedPrefab, transform.position, transform.rotation);
+            Transform t = Instantiate(ConstructedPrefab, transform.position, transform.rotation) as Transform;
+            t.parent = transform.parent;
+            t.GetComponent<ActiveEntity>().FactionFlags = FactionFlags;
             Destroy(gameObject);
             return true;
         }

@@ -355,7 +355,7 @@ public abstract class Mob : ActiveEntity
         _attackTime = Math.Max(_attackTime - Time.deltaTime, 0);
         if (_house == null)
         {
-            CityManager.FindHouse(this);
+           // CityManager.FindHouse(this);
         }
     }
     protected virtual void DeadUpdate() { }

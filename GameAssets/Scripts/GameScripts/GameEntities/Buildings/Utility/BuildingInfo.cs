@@ -8,6 +8,7 @@ public class BuildingInfo : MonoBehaviour {
     public ResourceType[] requiredResources;
     public int[] requiredResourceAmount;
     public BuildingPlaceController.PlaceType placeType = BuildingPlaceController.PlaceType.Single;
+    public FactionFlags factionFlags;
 
     /// <summary>
     /// Creates a new BuildingInfo with from the references passed in via the info variable
@@ -17,13 +18,14 @@ public class BuildingInfo : MonoBehaviour {
     {
         // It is easier to just have a single info parameter as if we ever need to add additional info
         // everything can be easily changed here rather than having to change the variables passed in
-        // throughout the entire code base of anything that calls this method
+        // throughout the entire code base of anything that calls this method. Also since this is 
+        // MonoBehaviour we cannot just create this as a struct.
         this.BuildingName = info.BuildingName;
         this.RequiredBuildUnits = info.RequiredBuildUnits;
         this.requiredResources = info.requiredResources;
         this.requiredResourceAmount = info.requiredResourceAmount;
         this.placeType = info.placeType;
-
+        this.factionFlags = info.factionFlags;
     }
 
 }

@@ -31,11 +31,6 @@ public class House : Building
         _currentResidents = new List<Mob>();
     }
 
-    void Update()
-    {
-
-    }
-
     public void AddResident(Mob mob)
     {
         Debug.Log(_currentResidents.Count + " : " + maxResidents);

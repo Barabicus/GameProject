@@ -114,8 +114,8 @@ public class BuildingPlaceController : Controller
                     _matColorChanger.ChangeColor(canPlaceColor);
                 }
                 RaycastHit hit;
-                // If the mouse if over the terrain
-                if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, placeDistance, 1 << 9))
+                // If the mouse is over the terrain
+                if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, placeDistance, 1 << 9) && hit.collider.tag.Equals("Ground"))
                 {
                     BuildingPreview.gameObject.SetActive(true);
                     BuildingPreview.position = hit.point;
@@ -125,12 +125,10 @@ public class BuildingPlaceController : Controller
                         switch (_placeType)
                         {
                             case PlaceType.Single:
-                               ((Transform)Instantiate(Blueprint, _placePosition, Blueprint.rotation)).gameObject.SetActive(true);
-                                break;
-                            case PlaceType.Drag:
-                                // Instantiate at inital position
-                                Transform t  = Instantiate(Blueprint, _placePosition, _selectedBlueprint.rotation) as Transform;
-                        //        StartCoroutine(DragPlace(t));
+                                Transform trans = ((Transform)Instantiate(Blueprint, _placePosition, Blueprint.rotation));
+                                trans.GetComponent<BuildingInfo>().factionFlags = FactionFlags.one;
+                                trans.gameObject.SetActive(true);
+                                trans.parent = hit.collider.transform.parent;                                
                                 break;
                         }
                     }

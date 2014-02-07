@@ -9,7 +9,7 @@ public class SpawnPoint : Building {
 
     private DateTime currentTime = DateTime.Now;
 
-    public override void Tick()
+    protected override void Tick()
     {
         base.Tick();
         if (currentTime.Second > (System.DateTime.Now.Second - time))

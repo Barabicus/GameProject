@@ -8,6 +8,7 @@ public class Building : ActiveEntity
 
     #region Fields
     public int maxHP;
+    public int tickFrequency = 5;
 
     public bool isInvincible = false;
 
@@ -17,6 +18,7 @@ public class Building : ActiveEntity
     private CityManager _cityManager;
     private FactionFlags _factionFlags = FactionFlags.None;
     private FactionFlags _enemyFlags = FactionFlags.None;
+    private float _lastTick;
 
     #endregion
 
@@ -75,6 +77,8 @@ public class Building : ActiveEntity
     void Start()
     {
         base.Start();
+        _lastTick = Time.time;
+        transform.parent.GetComponent<IslandManager>().cityManager.AddBuilding(this);
         SelectableList.AddSelectableEntity(this);
         // Register with city manager
         PlayerManager.Instance.cityManager.AddBuilding(this);
@@ -115,7 +119,11 @@ public class Building : ActiveEntity
     {
         if (buildState == BuildState.Constructed)
         {
-            Tick();
+            if (Time.time - _lastTick >= tickFrequency)
+            {
+                _lastTick = Time.time;
+                Tick();
+            }
         }
     }
 
@@ -123,7 +131,7 @@ public class Building : ActiveEntity
     /// Building tick. Used to advance building progression if any exists. For example
     /// if a building is producing some sort of resource progrssion will be added via the tick.
     /// </summary>
-    public virtual void Tick() {}
+    protected virtual void Tick() {}
 
     #endregion
 

@@ -86,7 +86,6 @@ public class CityManager : Building
 
     public void FindHouse(Mob mob)
     {
-        Debug.Log("Free Houses: " + _freeHouses.Count);
         if (_freeHouses.Count > 0)
         {
             _freeHouses[0].AddResident(mob);
