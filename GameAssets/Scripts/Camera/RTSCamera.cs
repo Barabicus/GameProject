@@ -98,9 +98,6 @@ public class RTSCamera : MonoBehaviour
 
     void LateUpdate()
     {
-        // Allow the user to exit
-        if (Input.GetKeyDown(KeyCode.Escape))
-            Application.Quit();
         switch (_state)
         {
             case CameraState.WorldView:

@@ -7,7 +7,7 @@ public class WorldResource : ActiveEntity
 
     #region Fields
 
-    public Mob.MobFlags resourceRequirement = Mob.MobFlags.None;
+    public MobFlags resourceRequirement = MobFlags.None;
     public ResourceType resource;
     public bool isInfinite = false;
     public bool regenerates = false;
@@ -113,7 +113,12 @@ public class WorldResource : ActiveEntity
         }
     }
 
-    public bool CanHarvest(Mob.MobFlags flags)
+    public void DestroyResource()
+    {
+        Destroy(gameObject);
+    }
+
+    public bool CanHarvest(MobFlags flags)
     {
         return (flags & resourceRequirement) == resourceRequirement;
     }

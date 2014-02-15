@@ -106,10 +106,10 @@ public class BuildingConstructor : ActiveEntity
                 Mob mob = actionEvent.entity.GetComponent<Mob>();
                 switch (mob.CurrentActivity)
                 {
-                    case Mob.ActivityState.Building:
+                    case ActivityState.Building:
                         Construct(mob.Skills.buildPower);
                         break;
-                    case Mob.ActivityState.Supplying:
+                    case ActivityState.Supplying:
                         SupplyResources(mob.Resource);
                         break;
                 }

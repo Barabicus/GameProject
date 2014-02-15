@@ -119,13 +119,17 @@ public class BuildingPlaceController : Controller
                 {
                     BuildingPreview.gameObject.SetActive(true);
                     BuildingPreview.position = hit.point;
+                    if (Input.GetMouseButtonDown(1))
+                    {
+                        BuildingPreview.Rotate(Vector3.up, 90f);
+                    }
                     if (Input.GetMouseButtonDown(0))
                     {
                         _placePosition = hit.point;
                         switch (_placeType)
                         {
                             case PlaceType.Single:
-                                Transform trans = ((Transform)Instantiate(Blueprint, _placePosition, Blueprint.rotation));
+                                Transform trans = ((Transform)Instantiate(Blueprint, _placePosition, BuildingPreview.rotation));
                                 trans.GetComponent<BuildingInfo>().factionFlags = FactionFlags.one;
                                 trans.gameObject.SetActive(true);
                                 trans.parent = hit.collider.transform.parent;                                

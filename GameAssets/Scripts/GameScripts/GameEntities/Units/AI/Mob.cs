@@ -3,6 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
+#region Delegates
+public delegate void MobAction(Mob mob);
+#endregion
+
 /// <summary>
 /// AI Base script. A Rigid body is required to check for collisions. This rigidbody should always be
 /// Kinematic however so to not affect the character controller.
@@ -12,12 +16,12 @@ using System;
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(Resource))]
 [RequireComponent(typeof(DynamicGridObstacle))]
-public abstract class Mob : ActiveEntity
+public class Mob : ActiveEntity
 {
 
-    #region Events
-    public delegate void MobEvent(Mob mob);
-    public event MobEvent Killed;
+    #region Events & Delegates
+    public event MobAction Killed;
+    public MobAction JobTask;
     #endregion
 
     #region Fields
@@ -73,6 +77,7 @@ public abstract class Mob : ActiveEntity
     private Transform _healthPivot;
     private House _house;
     private CityManager _cityManager;
+    private Gender _gender;
 
     #endregion
 
@@ -238,59 +243,13 @@ public abstract class Mob : ActiveEntity
     }
     #endregion
 
-    #region States
-
-    /// <summary>
-    /// Activity States. Special refferes to a mob specific special state such as
-    /// Building, cutting wood, mining etc etc
-    /// </summary>
-    public enum ActivityState
-    {
-        None,
-        Attacking,
-        Collecting,
-        Supplying,
-        Mining,
-        Woodcutting,
-        Building
-    }
-
-    public enum LivingState
-    {
-        Alive,
-        Dead
-    }
-
-    public enum LocomotionState
-    {
-        Idle,
-        Walking,
-        Running
-    }
-
-    #region Flags
-
-    [Flags]
-    public enum MobFlags
-    {
-        None = 0x0,
-        CanBuild,
-        CanCollect,
-        CanWoodcut,
-        CanAttack,
-        CanMine,
-    }
-
-    #endregion
-
-    #endregion
-
     #region UnityMethodCalls
 
     protected override void Awake()
     {
         base.Awake();
-        skills = new MobSkills();
+        skills = new MobSkills(0.5f, 3f, 1, 5f, 0.5f, 1, 0.5f);
+        FactionFlags = global::FactionFlags.one;
         _anim = GetComponent<Animator>();
         _weaponcontrol = GetComponent<WeaponControl>();
     }
@@ -333,7 +292,6 @@ public abstract class Mob : ActiveEntity
 
         // Set Speed
         AIPath.speed = skills.speed;
-        skills.actionSpeed = 0.5f;
 
     }
 
@@ -349,17 +307,6 @@ public abstract class Mob : ActiveEntity
                 break;
         }
     }
-
-    protected virtual void LivingUpdate()
-    {
-        _attackTime = Math.Max(_attackTime - Time.deltaTime, 0);
-        if (_house == null)
-        {
-           // CityManager.FindHouse(this);
-        }
-    }
-    protected virtual void DeadUpdate() { }
-
     #endregion
 
     #region MobLogic
@@ -371,21 +318,6 @@ public abstract class Mob : ActiveEntity
             Animator.SetTrigger("combo");
             target.Damage(damage);
             _attackTime = skills.attackSpeed;
-        }
-    }
-
-    /// <summary>
-    /// This method essentially calls PerformAction on another ActiveEntity from this current mob.
-    /// Unlike accessing PerformAction directly this method takes into account the mobs action speed
-    /// i.e how fast a mob can perform an action in succession.
-    /// </summary>
-    /// <param name="actionEvent"></param>
-    public void TryPerformAction(PerformActionEvent actionEvent, ActiveEntity otherEntity)
-    {
-        if (Time.time - _lastActionTime > skills.actionSpeed)
-        {
-            _lastActionTime = Time.time;
-            otherEntity.PerformAction(actionEvent);
         }
     }
 
@@ -425,6 +357,52 @@ public abstract class Mob : ActiveEntity
         Animator.SetTrigger("Died");
     }
 
+    protected virtual void LivingUpdate()
+    {
+        _attackTime = Math.Max(_attackTime - Time.deltaTime, 0);
+        if (JobTask != null)
+            JobTask(this);
+        if (ActionEntity != null)
+        {
+            switch (CurrentActivity)
+            {
+                case ActivityState.Attacking:
+                    if (distanceToTarget() < 5f)
+                    {
+                        Attack(ActionEntity, skills.attackPower);
+                    }
+                    break;
+                case ActivityState.Supplying:
+                    TryPerformAction(new PerformActionEvent(this, tag), ActionEntity);
+                    break;
+                case ActivityState.Woodcutting:
+                    TryPerformAction(new PerformActionEvent(this, tag), ActionEntity);
+                    Animator.SetTrigger("chopWood");
+                    break;
+            }
+        }
+    }
+    protected virtual void DeadUpdate() { }
+
+    /// <summary>
+    /// This method essentially calls PerformAction on another ActiveEntity from this current mob.
+    /// Unlike accessing PerformAction directly this method takes into account the mobs action speed
+    /// i.e how fast a mob can perform an action in succession.
+    /// </summary>
+    /// <param name="actionEvent"></param>
+    public void TryPerformAction(PerformActionEvent actionEvent, ActiveEntity otherEntity)
+    {
+        if (Time.time - _lastActionTime > skills.actionSpeed)
+        {
+            _lastActionTime = Time.time;
+            otherEntity.PerformAction(actionEvent);
+        }
+    }
+
+    /// <summary>
+    /// Have this mob react to an ActionEvent
+    /// </summary>
+    /// <param name="actionEvent"></param>
     public override void PerformAction(PerformActionEvent actionEvent)
     {
         base.PerformAction(actionEvent);
@@ -445,6 +423,10 @@ public abstract class Mob : ActiveEntity
                     CurrentActivity = ActivityState.Attacking;
                     SetEntityAndFollow(actionEvent.entity);
                 }
+                else
+                {
+                    SetEntityAndFollow(actionEvent.entity);
+                }
                 break;
             case "Building":
                 if (IsEnemey(actionEvent.entity.FactionFlags))
@@ -452,6 +434,21 @@ public abstract class Mob : ActiveEntity
                     CurrentActivity = ActivityState.Attacking;
                     SetEntityAndFollow(actionEvent.entity);
                 }
+                else
+                {
+                    TryPerformAction(new PerformActionEvent(this, tag), actionEvent.entity);
+                }
+                break;
+            case "Tree":
+                    CurrentActivity = ActivityState.Woodcutting;
+                    SetEntityAndFollow(actionEvent.entity);
+                break;
+            case "BluePrint":
+                    if (!IsEnemey(actionEvent.entity.FactionFlags))
+                    {
+                        CurrentActivity = ActivityState.Supplying;
+                        SetEntityAndFollow(actionEvent.entity);
+                    }
                 break;
         }
     }
@@ -510,10 +507,74 @@ public struct MobSkills
     public int buildPower;
     public float buildSpeed;
 
+    public MobSkills(float actionSpeed, float speed, int attackPower, float attackRange, float attackSpeed, int buildPower, float buildSpeed)
+    {
+        this.actionSpeed = actionSpeed;
+        this.speed = speed;
+        this.attackPower = attackPower;
+        this.attackRange = attackRange;
+        this.attackSpeed = attackSpeed;
+        this.buildPower = buildPower;
+        this.buildSpeed = buildSpeed;
+    }
+
 }
+
+#region States
+
+/// <summary>
+/// Activity States. Special refferes to a mob specific special state such as
+/// Building, cutting wood, mining etc etc
+/// </summary>
+public enum ActivityState
+{
+    None,
+    Attacking,
+    Collecting,
+    Supplying,
+    Mining,
+    Woodcutting,
+    Building
+}
+
+public enum Gender
+{
+    Male,
+    Female
+}
+
+public enum LivingState
+{
+    Alive,
+    Dead
+}
+
+public enum LocomotionState
+{
+    Idle,
+    Walking,
+    Running
+}
+
+#region Flags
+
+[Flags]
+public enum MobFlags
+{
+    None = 0x0,
+    CanBuild,
+    CanSupply,
+    CanWoodcut,
+    CanAttack,
+    CanMine,
+}
+
+#endregion
+
+#endregion
 
 public struct MobNeeds
 {
     public float hunger;
-    public float tirednes;
+    public float tiredness;
 }

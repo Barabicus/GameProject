@@ -54,6 +54,8 @@ public abstract class ActiveEntity : GameEntity, IDamageable, IFactionFlag
         _ho = gameObject.GetComponent<HighlightableObject>();
     }
 
+    protected virtual void Awake() { }
+
 
     public void OnMouseEnter()
     {
