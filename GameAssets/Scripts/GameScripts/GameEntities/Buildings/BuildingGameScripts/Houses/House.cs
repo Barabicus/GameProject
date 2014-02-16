@@ -41,6 +41,7 @@ public class House : Building
     {
         if (_currentResidents.Count < maxResidents)
         {
+            Debug.Log(mob);
             mob.Killed += RemoveResident;
             mob.CityManager = CityManager;
             _currentResidents.Add(mob);

@@ -161,7 +161,7 @@ public class Mob : ActiveEntity
     public ActivityState CurrentActivity
     {
         get { return _activityState; }
-        protected set
+        set
         {
             switch (value)
             {
@@ -170,6 +170,7 @@ public class Mob : ActiveEntity
                     break;
                 case ActivityState.None:
                     // Reset values
+                    ActionEntity = null;
                     Animator.SetBool("weaponDrawn", false);
                     break;
             }
@@ -367,17 +368,35 @@ public class Mob : ActiveEntity
             switch (CurrentActivity)
             {
                 case ActivityState.Attacking:
-                    if (distanceToTarget() < 5f)
+                    if (distanceToTarget() < 10f)
                     {
                         Attack(ActionEntity, skills.attackPower);
                     }
                     break;
                 case ActivityState.Supplying:
-                    TryPerformAction(new PerformActionEvent(this, tag), ActionEntity);
+                    if (distanceToTarget() < 10f)
+                    {
+                        TryPerformAction(new PerformActionEvent(this, tag), ActionEntity);
+                    }
                     break;
                 case ActivityState.Woodcutting:
-                    TryPerformAction(new PerformActionEvent(this, tag), ActionEntity);
-                    Animator.SetTrigger("chopWood");
+                    if (distanceToTarget() < 10f)
+                    {
+                        TryPerformAction(new PerformActionEvent(this, tag), ActionEntity);
+                        Animator.SetTrigger("chopWood");
+                    }
+                    break;
+                case ActivityState.Retrieving:
+                    if (distanceToTarget() < 10f)
+                    {
+                        TryPerformAction(new PerformActionEvent(this), ActionEntity);
+                    }
+                    break;
+                case ActivityState.Building:
+                    if (distanceToTarget() < 10f)
+                    {
+                        TryPerformAction(new PerformActionEvent(this), ActionEntity);
+                    }
                     break;
             }
         }
@@ -390,7 +409,7 @@ public class Mob : ActiveEntity
     /// i.e how fast a mob can perform an action in succession.
     /// </summary>
     /// <param name="actionEvent"></param>
-    public void TryPerformAction(PerformActionEvent actionEvent, ActiveEntity otherEntity)
+    private void TryPerformAction(PerformActionEvent actionEvent, ActiveEntity otherEntity)
     {
         if (Time.time - _lastActionTime > skills.actionSpeed)
         {
@@ -436,7 +455,7 @@ public class Mob : ActiveEntity
                 }
                 else
                 {
-                    TryPerformAction(new PerformActionEvent(this, tag), actionEvent.entity);
+                    actionEvent.entity.PerformAction(new PerformActionEvent(this));
                 }
                 break;
             case "Tree":
@@ -467,7 +486,7 @@ public class Mob : ActiveEntity
     {
         return Vector3.Distance(transform.position, ActionTransform.position);
     }
-    protected void SetEntityAndFollow(ActiveEntity entity)
+    public void SetEntityAndFollow(ActiveEntity entity)
     {
         ActionEntity = entity;
         ActionTransform = entity.transform;
@@ -530,8 +549,8 @@ public enum ActivityState
 {
     None,
     Attacking,
-    Collecting,
     Supplying,
+    Retrieving,
     Mining,
     Woodcutting,
     Building

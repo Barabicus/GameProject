@@ -3,6 +3,7 @@ using System.Collections;
 using System;
 
 [RequireComponent(typeof(BuildingInfo))]
+[RequireComponent(typeof(Resource))]
 public class Building : ActiveEntity
 {
 
@@ -19,6 +20,7 @@ public class Building : ActiveEntity
     private FactionFlags _factionFlags = FactionFlags.None;
     private FactionFlags _enemyFlags = FactionFlags.None;
     private float _lastTick;
+    private Resource _resource;
 
     #endregion
 
@@ -28,6 +30,10 @@ public class Building : ActiveEntity
     #endregion
 
     #region Properties
+    public Resource Resource
+    {
+        get { return _resource; }
+    }
     public CityManager CityManager
     {
         get { return _cityManager; }
@@ -85,6 +91,7 @@ public class Building : ActiveEntity
     protected override void Start()
     {
         base.Start();
+        _resource = GetComponent<Resource>();
         _lastTick = Time.time;
         transform.parent.GetComponent<IslandManager>().cityManager.AddBuilding(this);
         SelectableList.AddSelectableEntity(this);

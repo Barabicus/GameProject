@@ -96,7 +96,16 @@ public struct PerformActionEvent
     public int[] intArgs;
     public string[] stringArgs;
     public Vector3[] vector3Args;
-    
+
+    public PerformActionEvent(ActiveEntity entity)
+    {
+        this.entity = entity;
+        this.tag = entity.tag;
+        this.floatArgs = new float[0];
+        this.intArgs = new int[0];
+        this.stringArgs = new string[0];
+        this.vector3Args = new Vector3[0];
+    }
 
     public PerformActionEvent(ActiveEntity entity, string tag)
     {

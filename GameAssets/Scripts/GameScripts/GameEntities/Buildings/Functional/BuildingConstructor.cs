@@ -29,7 +29,7 @@ public class BuildingConstructor : ActiveEntity
     #endregion
 
     #region Properties
-    public bool ResourceRequirementMet
+    public bool HasBeenSupplied
     {
         get { return _resourceRequirementMet; }
     }
@@ -71,16 +71,16 @@ public class BuildingConstructor : ActiveEntity
         requiredResourceAmount = GetComponent<BuildingInfo>().requiredResourceAmount;
         FactionFlags = GetComponent<BuildingInfo>().factionFlags;
         currentResourceAmount = new int[requiredResourceAmount.Length];
+        BlueprintList.Instance.Blueprints.Add(this);
     }
 
     #endregion
 
     #region Logic
 
-    // Update is called once per frame
-    void Update()
+    void OnDestroy()
     {
-
+        BlueprintList.Instance.Blueprints.Remove(this);
     }
 
     public override bool Damage(int damage)
