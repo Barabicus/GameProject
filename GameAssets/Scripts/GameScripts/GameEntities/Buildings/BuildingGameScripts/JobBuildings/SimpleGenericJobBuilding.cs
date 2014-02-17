@@ -16,15 +16,16 @@ public class SimpleGenericJobBuilding : JobBuilding
     {
         base.Start();
         _resources = new Dictionary<WorldResource, Mob>();
-        foreach (RaycastHit hit in Physics.SphereCastAll(new Ray(point.position, new Vector3(1, 1, 1)), 50f, 1f))
-        {
-            if (hit.collider.tag.Equals("Tree"))
-            {
-                _resources.Add(hit.collider.GetComponent<WorldResource>(), null);
-            }
 
+        foreach (Collider c in Physics.OverlapSphere(point.position, 50f, 1 << 11))
+        {
+            if (c.tag.Equals("Tree"))
+            {
+                _resources.Add(c.GetComponent<WorldResource>(), null);
+            }
         }
         blueprints = BlueprintList.Instance.Blueprints;
+		Resource.AddResource(ResourceType.Wood, 500);
     }
 
     protected override void Awake()
@@ -48,10 +49,8 @@ public class SimpleGenericJobBuilding : JobBuilding
                 {
                     case ActivityState.Supplying:
                         Resource.AddResource(ResourceType.Wood, m.Resource.RemoveResource(ResourceType.Wood, 10));
-                        if (Resource.CurrentResources[ResourceType.Wood] > 50)
+                        if (Resource.CurrentResources[ResourceType.Wood] > 200)
                         {
-                            m.JobTask = null;
-                            LumberWorkers.Remove(m);
                             m.CurrentActivity = ActivityState.None;
                         }
                         if (m.Resource.CurrentResources[ResourceType.Wood] == 0)
@@ -71,8 +70,7 @@ public class SimpleGenericJobBuilding : JobBuilding
     protected override void Tick()
     {
         base.Tick();
-        if (blueprints.Count > 0)
-        if (Resource.CurrentResources[ResourceType.Wood] < 50 && LumberWorkers.Count != 3)
+        if (Resource.CurrentResources[ResourceType.Wood] < 200 && LumberWorkers.Count != 3)
         {
             foreach (Mob m in Workers)
             {
@@ -107,33 +105,30 @@ public class SimpleGenericJobBuilding : JobBuilding
 
     void BuildTask(Mob mob)
     {
-        if (blueprints.Count > 0)
+        foreach (BuildingConstructor bc in blueprints)
         {
-            if (!blueprints[0].HasBeenSupplied)
+            if (!bc.HasBeenSupplied)
             {
-                if ((mob.Resource.CurrentResources[ResourceType.Wood] < 10 && mob.CurrentActivity != ActivityState.Retrieving && mob.CurrentActivity != ActivityState.Building) || (mob.CurrentActivity == ActivityState.Building && mob.Resource.CurrentResources[ResourceType.Wood] == 0))
+                if (mob.Resource.CurrentResources[ResourceType.Wood] == 0 && mob.ActionEntity != this)
                 {
+                    // Need wood, get wood
                     mob.CurrentActivity = ActivityState.Retrieving;
                     mob.SetEntityAndFollow(this);
                 }
-                else if (mob.CurrentActivity == ActivityState.Retrieving && mob.Resource.CurrentResources[ResourceType.Wood] > 10)
+                else if (mob.Resource.CurrentResources[ResourceType.Wood] >= 1)
                 {
+                    // We have enough, supply
                     mob.CurrentActivity = ActivityState.Supplying;
-                    mob.SetEntityAndFollow(blueprints[0]);
+                    mob.SetEntityAndFollow(bc);
                 }
+                break;
             }
             else
             {
-                if (mob.CurrentActivity != ActivityState.Building)
-                {
-                    mob.CurrentActivity = ActivityState.Building;
-                    mob.SetEntityAndFollow(blueprints[0]);
-                }
+                mob.CurrentActivity = ActivityState.Building;
+                mob.SetEntityAndFollow(bc);
+                break;
             }
-        }
-        else
-        {
-            mob.JobTask = null;
         }
     }
 
@@ -141,15 +136,15 @@ public class SimpleGenericJobBuilding : JobBuilding
     {
         if (mob.ActionEntity == null)
         {
-            foreach (KeyValuePair<WorldResource, Mob> kvp in _resources)
+            foreach (Collider c in Physics.OverlapSphere(point.position, 50f, 1 << 11))
             {
-                if (kvp.Value == null)
+                if (c.tag.Equals("Tree"))
                 {
-                    mob.PerformAction(new PerformActionEvent(kvp.Key));
-                    _resources[kvp.Key] = mob;
+                    mob.PerformAction(new PerformActionEvent(c.GetComponent<WorldResource>()));
                     break;
                 }
             }
+
         }
         
         if (mob.Resource.CurrentResources[ResourceType.Wood] >= 10 && mob.CurrentActivity != ActivityState.Supplying)

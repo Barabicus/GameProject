@@ -50,11 +50,13 @@ public abstract class ActiveEntity : GameEntity, IDamageable, IFactionFlag
 
     protected virtual void Start()
     {
+    }
+
+    protected virtual void Awake()
+    {
         gameObject.AddComponent<HighlightableObject>();
         _ho = gameObject.GetComponent<HighlightableObject>();
     }
-
-    protected virtual void Awake() { }
 
 
     public void OnMouseEnter()

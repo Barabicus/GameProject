@@ -361,6 +361,8 @@ public class Mob : ActiveEntity
     protected virtual void LivingUpdate()
     {
         _attackTime = Math.Max(_attackTime - Time.deltaTime, 0);
+        if (ActionEntity == null)
+            CurrentActivity = ActivityState.None;
         if (JobTask != null)
             JobTask(this);
         if (ActionEntity != null)
