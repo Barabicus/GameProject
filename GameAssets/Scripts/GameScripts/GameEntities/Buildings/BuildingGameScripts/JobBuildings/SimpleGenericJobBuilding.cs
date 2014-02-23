@@ -25,7 +25,6 @@ public class SimpleGenericJobBuilding : JobBuilding
             }
         }
         blueprints = BlueprintList.Instance.Blueprints;
-		Resource.AddResource(ResourceType.Wood, 500);
     }
 
     protected override void Awake()

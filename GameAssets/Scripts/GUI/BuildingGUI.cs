@@ -30,9 +30,8 @@ public class BuildingGUI : MonoBehaviour
                 StateController.Instance.GetController<BuildingPlaceController>().BuildingPreview = _previewRef;
 
             });
-
-            buildingGrid.Reposition();
         }
+        buildingGrid.Reposition();
     }
 
 }

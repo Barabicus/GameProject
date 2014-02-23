@@ -12,10 +12,12 @@ public class Building : ActiveEntity
     public float tickFrequency = 5;
     public BuildingCategory buildingCategory;
     public bool isInvincible = false;
+    public GameObject controlPrefab;
 
     protected int currentHP;
     public BuildState buildState = BuildState.Constructed;
 
+    private GameObject _controlInstance;
     private CityManager _cityManager;
     private FactionFlags _factionFlags = FactionFlags.None;
     private FactionFlags _enemyFlags = FactionFlags.None;
@@ -91,6 +93,16 @@ public class Building : ActiveEntity
     protected override void Start()
     {
         base.Start();
+
+        if (HUDRoot.go != null && controlPrefab != null)
+        {
+            _controlInstance = NGUITools.AddChild(HUDRoot.go, controlPrefab);
+            // Make the UI follow the target
+            _controlInstance.AddComponent<UIFollowTarget>().target = transform.FindChild("_pivot");
+            _controlInstance.SetActive(false);
+        }
+        
+
         _resource = GetComponent<Resource>();
         _lastTick = Time.time;
         transform.parent.GetComponent<IslandManager>().cityManager.AddBuilding(this);
@@ -146,6 +158,14 @@ public class Building : ActiveEntity
     /// if a building is producing some sort of resource progrssion will be added via the tick.
     /// </summary>
     protected virtual void Tick() {}
+
+    void OnMouseDown()
+    {
+        if (_controlInstance != null)
+        {
+            _controlInstance.SetActive(true);
+        }
+    }
 
     #endregion
 

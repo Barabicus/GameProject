@@ -270,7 +270,7 @@ public class Mob : ActiveEntity
         _healthPivot = transform.FindChild("_healthPivot");
         if (_healthPivot == null)
             Debug.LogWarning(gameObject.ToString() + "'s does not have a '_healthPivot' transform!");
-
+        /*
         if (HUDRoot.go == null)
         {
             Debug.LogWarning("Hud Root is null!");
@@ -281,6 +281,7 @@ public class Mob : ActiveEntity
             // Make the UI follow the target
             child.AddComponent<UIFollowTarget>().target = _healthPivot;
         }
+         */
 
         rigidbody.isKinematic = true;
         Hp = maxHp;
