@@ -15,7 +15,6 @@ public delegate void MobAction(Mob mob);
 [RequireComponent(typeof(WeaponControl))]
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(Resource))]
-[RequireComponent(typeof(DynamicGridObstacle))]
 public class Mob : ActiveEntity
 {
 
@@ -72,16 +71,32 @@ public class Mob : ActiveEntity
     /// </summary>
     private float _attackTime = 0f;
     private string _mobName = "undefined";
-    private LocomotionState _locomotionState = LocomotionState.Idle;
     private float _lastActionTime = 0.0f;
     private Transform _healthPivot;
     private House _house;
     private CityManager _cityManager;
     private Gender _gender;
+    private JobBuilding _jobBuilding;
 
     #endregion
 
     #region Properties
+    public JobBuilding JobBuilding
+    {
+        get { return _jobBuilding; }
+        set
+        {
+            if (value == null)
+                CityManager.UnemployedCitizens.Add(this);
+            else
+                CityManager.UnemployedCitizens.Remove(this);
+            _jobBuilding = value;
+        }
+    }
+    public bool HasJob
+    {
+        get { return _jobBuilding == null; }
+    }
     public CityManager CityManager
     {
         get { return _cityManager; }
@@ -237,11 +252,6 @@ public class Mob : ActiveEntity
         get { return _mobName; }
         set { _mobName = value; }
     }
-    public LocomotionState MobLocoMotionState
-    {
-        get { return _locomotionState; }
-        set { _locomotionState = value; }
-    }
     #endregion
 
     #region UnityMethodCalls
@@ -253,6 +263,7 @@ public class Mob : ActiveEntity
         FactionFlags = global::FactionFlags.one;
         _anim = GetComponent<Animator>();
         _weaponcontrol = GetComponent<WeaponControl>();
+        Physics.IgnoreLayerCollision(11, 11);
     }
 
     protected override void Start()
@@ -569,13 +580,6 @@ public enum LivingState
 {
     Alive,
     Dead
-}
-
-public enum LocomotionState
-{
-    Idle,
-    Walking,
-    Running
 }
 
 #region Flags

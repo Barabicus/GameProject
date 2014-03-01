@@ -23,6 +23,10 @@ public class CityManager : Building
     private List<Building> _buildings;
     private List<Mob> _citizens;
     /// <summary>
+    /// Cached list of all the citizens that are currently unemployed.
+    /// </summary>
+    private List<Mob> _unemployedCitizens;
+    /// <summary>
     /// List of houses that have free space
     /// </summary>
     private List<House> _freeHouses;
@@ -32,6 +36,10 @@ public class CityManager : Building
     #endregion
 
     #region Properties
+    public List<Mob> UnemployedCitizens
+    {
+        get { return _unemployedCitizens; }
+    }
     public List<Mob> Citizens
     {
         get { return _citizens; }
@@ -42,6 +50,7 @@ public class CityManager : Building
     protected override void Awake()
     {
         base.Awake();
+        _unemployedCitizens = new List<Mob>();
         _buildings = new List<Building>();
         _citizens = new List<Mob>();
         _freeHouses = new List<House>();
@@ -84,6 +93,29 @@ public class CityManager : Building
         }
     }
 
+    public bool AddCitizen(Mob m)
+    {
+        if (_citizens.Contains(m))
+            return false;
+        _citizens.Add(m);
+        if (!m.HasJob)
+            _unemployedCitizens.Add(m);
+        if (m.CityManager != null)
+            m.CityManager.RemoveCitizen(m);
+        m.CityManager = this;
+        return true;
+
+    }
+
+    public bool RemoveCitizen(Mob m)
+    {
+        if (!_citizens.Contains(m))
+            return false;
+        m.CityManager = null;
+        _unemployedCitizens.Remove(m);
+        return _citizens.Remove(m);
+    }
+
     public void AddResourceContainer(ResourceBuilding building)
     {
         building.Resource.ResourceChanged += UpdateCachedResources;
@@ -110,7 +142,7 @@ public class CityManager : Building
         base.Update();
         if (Input.GetKeyDown(KeyCode.I))
         {
-        //    Mob m = PlayerManager.Instance.SpawnMonster(Random.Range(0, 3), _spawnPoint, spawnParticles);
+            //    Mob m = PlayerManager.Instance.SpawnMonster(Random.Range(0, 3), _spawnPoint, spawnParticles);
             Mob m = PlayerManager.Instance.SpawnMonster(0, _spawnPoint, spawnParticles);
             m.FactionFlags = global::FactionFlags.one;
             m.EnemyFlags = global::FactionFlags.two;
@@ -132,6 +164,11 @@ public class CityManager : Building
                 _citizens.Add(m);
             }
         }
+    }
+
+    public void CheckForJobs(Mob mob)
+    {
+       
     }
 
 }

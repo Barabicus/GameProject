@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 
 public class House : Building
 {
@@ -10,19 +11,16 @@ public class House : Building
     public Mob[] tempResidents;
 
     private List<Mob> _currentResidents;
-    private CityManager _belongingCity;
 
     #region Properties
-    public int CurrentResidentsCount { get { return _currentResidents.Count; } }
-    public CityManager CityManager
+    /// <summary>
+    /// Returns a cloned list of the current residents of this house. 
+    /// </summary>
+    public ReadOnlyCollection<Mob> CurrentResidents
     {
         get
         {
-            return _belongingCity;
-        }
-        set
-        {
-            _belongingCity = value;
+            return _currentResidents.AsReadOnly();
         }
     }
     #endregion
@@ -37,13 +35,24 @@ public class House : Building
         }
     }
 
+    public override void PerformAction(PerformActionEvent actionEvent)
+    {
+        base.PerformAction(actionEvent);
+        switch (actionEvent.tag)
+        {
+            case "Mob":
+                AddResident(actionEvent.entity.GetComponent<Mob>());
+                break;
+        }
+    }
+
     public void AddResident(Mob mob)
     {
-        if (_currentResidents.Count < maxResidents)
+        if (_currentResidents.Count < maxResidents && !_currentResidents.Contains(mob))
         {
-            Debug.Log(mob);
             mob.Killed += RemoveResident;
             mob.CityManager = CityManager;
+            mob.House = this;
             _currentResidents.Add(mob);
         }
     }

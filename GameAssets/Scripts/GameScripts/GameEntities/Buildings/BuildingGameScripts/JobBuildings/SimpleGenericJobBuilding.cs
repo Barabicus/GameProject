@@ -4,9 +4,6 @@ using System.Collections.Generic;
 
 public class SimpleGenericJobBuilding : JobBuilding
 {
-    public Transform point;
-
-    Dictionary<WorldResource, Mob> _resources;
     List<BuildingConstructor> blueprints;
 
     List<Mob> LumberWorkers = new List<Mob>();
@@ -15,15 +12,6 @@ public class SimpleGenericJobBuilding : JobBuilding
     protected override void Start()
     {
         base.Start();
-        _resources = new Dictionary<WorldResource, Mob>();
-
-        foreach (Collider c in Physics.OverlapSphere(point.position, 50f, 1 << 11))
-        {
-            if (c.tag.Equals("Tree"))
-            {
-                _resources.Add(c.GetComponent<WorldResource>(), null);
-            }
-        }
         blueprints = BlueprintList.Instance.Blueprints;
     }
 
@@ -104,6 +92,7 @@ public class SimpleGenericJobBuilding : JobBuilding
 
     void BuildTask(Mob mob)
     {
+        Debug.Log(mob.CityManager + " : " + mob.House);
         foreach (BuildingConstructor bc in blueprints)
         {
             if (!bc.HasBeenSupplied)
@@ -135,7 +124,7 @@ public class SimpleGenericJobBuilding : JobBuilding
     {
         if (mob.ActionEntity == null)
         {
-            foreach (Collider c in Physics.OverlapSphere(point.position, 50f, 1 << 11))
+            foreach (Collider c in Physics.OverlapSphere(transform.position, 50f, 1 << 11))
             {
                 if (c.tag.Equals("Tree"))
                 {

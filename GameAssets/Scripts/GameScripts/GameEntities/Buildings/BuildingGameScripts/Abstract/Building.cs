@@ -163,7 +163,7 @@ public class Building : ActiveEntity
     {
         if (_controlInstance != null)
         {
-            _controlInstance.SetActive(true);
+            BuildControlsGUIManager.Instance.CurrentControlBox = _controlInstance;
         }
     }
 

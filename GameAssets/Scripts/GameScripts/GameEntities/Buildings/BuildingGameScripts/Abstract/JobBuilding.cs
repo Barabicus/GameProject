@@ -24,19 +24,21 @@ public abstract class JobBuilding : Building {
     /// </summary>
     /// <param name="m"></param>
     /// <returns></returns>
-    protected bool AddWorker(Mob m)
+    public bool AddWorker(Mob m)
     {
         // Cant add another worker
-        if (_workers.Count >= maxWorkers || _workers.Contains(m))
+        if (_workers.Count >= maxWorkers || _workers.Contains(m) || m.HasJob)
             return false;
+        m.JobBuilding = this;
         _workers.Add(m);
         return true;
     }
 
-    protected bool RemoveWorker(Mob m)
+    public bool RemoveWorker(Mob m)
     {
         if (_workers.Contains(m))
         {
+            m.JobBuilding = null;
             _workers.Remove(m);
             return true;
         }

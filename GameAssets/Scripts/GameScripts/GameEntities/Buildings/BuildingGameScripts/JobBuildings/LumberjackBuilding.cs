@@ -5,14 +5,7 @@ using System;
 
 public class LumberjackBuilding : JobBuilding
 {
-
-    public Transform point;
-
-    void Start()
-    {
-        base.Start();
-        Debug.Log(FactionFlags);
-    }
+    List<Mob> LumberWorkers = new List<Mob>();
 
     public override void PerformAction(PerformActionEvent actionEvent)
     {
@@ -21,10 +14,7 @@ public class LumberjackBuilding : JobBuilding
         {
             case "Mob":
                 Mob m = actionEvent.entity as Mob;
-                if (!Workers.Contains(m))
-                {
-                    AddWorker(actionEvent.entity as Mob);
-                }
+                AddWorker(m);
 
                 switch (m.CurrentActivity)
                 {
@@ -52,13 +42,28 @@ public class LumberjackBuilding : JobBuilding
     protected override void Tick()
     {
         base.Tick();
+        if (Resource.CurrentResources[ResourceType.Wood] < 200 && LumberWorkers.Count != 3)
+        {
+            foreach (Mob m in Workers)
+            {
+                if (LumberWorkers.Count == 3)
+                    break;
+                if (LumberWorkers.Contains(m))
+                    continue;
+                LumberWorkers.Add(m);
+                if (m.JobTask == null)
+                {
+                    m.JobTask = LumberTask;
+                }
+            }
+        }
     }
 
     void LumberTask(Mob mob)
     {
         if (mob.ActionEntity == null)
         {
-            foreach (Collider c in Physics.OverlapSphere(point.position, 50f, 1 << 11))
+            foreach (Collider c in Physics.OverlapSphere(transform.position, 50f, 1 << 11))
             {
                 if (c.tag.Equals("Tree"))
                 {

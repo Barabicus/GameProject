@@ -1,22 +1,16 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
 public class SampleTerrain : MonoBehaviour
 {
 
-    const int size = 35; // the diameter of terrain portion that will raise under the game object
-    float[,] lastHeight;
-    int lastXpos, lastYpos;
-    Dictionary<Terrain, float[,]> resetHeights;
+    const int size = 30; // the diameter of terrain portion that will raise under the game object
 
     void Start()
     {
-        resetHeights = new Dictionary<Terrain, float[,]>();
-        foreach (Terrain t in Terrain.activeTerrains)
-        {
-            resetHeights.Add(t, t.terrainData.GetHeights(0, 0, t.terrainData.heightmapWidth, t.terrainData.heightmapHeight));
-        }
+
         StartCoroutine(TerrainTest());
     }
 
@@ -24,24 +18,18 @@ public class SampleTerrain : MonoBehaviour
     {
         while (true)
         {
-            RaycastHit hit;
-            if (Physics.Raycast(new Ray(transform.position, Vector3.down), out hit, Mathf.Infinity, 1 << 9))
+            foreach (Terrain t in Terrain.activeTerrains)
             {
-                if (hit.collider.tag.Equals("Ground"))
-                {
-                    try
-                    {
-                        ModifyTerrain(hit.collider.GetComponent<Terrain>());
-                    }
-                    catch(UnityException ex)
-                    {
-                        Debug.Log("Caught Exception: " + ex.Message);
-                    }
-                }
+                ModifyTerrain(t);
             }
 
             yield return new WaitForSeconds(0.5f);
         }
+    }
+
+    void Update()
+    {
+
     }
 
     void ModifyTerrain(Terrain terr)
@@ -49,7 +37,6 @@ public class SampleTerrain : MonoBehaviour
         int hmWidth = terr.terrainData.heightmapWidth, hmHeight = terr.terrainData.heightmapHeight;
         int posXInTerrain; // position of the game object in terrain width (x axis)
         int posYInTerrain; // position of the game object in terrain height (z axis)
-        float desiredHeight = 0; // the height we want that portion of terrain to be
 
         // get the normalized position of this game object relative to the terrain
         Vector3 tempCoord = (transform.position - terr.gameObject.transform.position);
@@ -58,37 +45,44 @@ public class SampleTerrain : MonoBehaviour
         coord.y = tempCoord.y / terr.terrainData.size.y;
         coord.z = tempCoord.z / terr.terrainData.size.z;
 
-        // get the position of the terrain heightmap where this game object is
-        posXInTerrain = (int)(coord.x * hmWidth);
-        posYInTerrain = (int)(coord.z * hmHeight);
 
         // we set an offset so that all the raising terrain is under this game object
         int offset = size / 2;
 
-        // get the heights of the terrain under this game object
-        float[,] heights = terr.terrainData.GetHeights(posXInTerrain - offset, posYInTerrain - offset, size, size);
-        lastHeight = heights;
+        // get the position of the terrain heightmap where this game object is
+        posXInTerrain = (int)(coord.x * hmWidth) - offset;
+        posYInTerrain = (int)(coord.z * hmHeight) - offset;
+
+        if (posXInTerrain > terr.terrainData.heightmapWidth || posYInTerrain > terr.terrainData.heightmapHeight || (posXInTerrain + size < 0) || (posYInTerrain + size < 0) )
+            return;
+
+        int sizeHeight, sizeWidth;
+        float[,] heights = getHeights(ref posXInTerrain, ref posYInTerrain, out sizeWidth, out sizeHeight, terr);
 
         // we set each sample of the terrain in the size to the desired height
-        for (int i = 0; i < size; i++)
+        for (int i = 0; i < sizeHeight; i++)
         {
-            for (int j = 0; j < size; j++)
+            for (int j = 0; j < sizeWidth; j++)
             {
-                heights[i, j] = heights[i, j] + Time.deltaTime;
+                heights[i, j] = heights[i, j] + 0.1f * Time.deltaTime;
             }
         }
 
-        // go raising the terrain slowly
-        desiredHeight += Time.deltaTime * 0.5f;
-
         // set the new height
-        int xpos = posXInTerrain - offset;
-        int ypos = posYInTerrain - offset;
-        lastXpos = xpos;
-        lastYpos = ypos;
+        int xpos = posXInTerrain;
+        int ypos = posYInTerrain;
 
         if (xpos <= terr.terrainData.heightmapWidth && ypos <= terr.terrainData.heightmapHeight)
             terr.terrainData.SetHeights(xpos, ypos, heights);
+    }
+
+    public float[,] getHeights(ref int xpos,ref int ypos, out int sizeWidth, out int sizeHeight, Terrain terr)
+    {
+        sizeWidth = (xpos + size) < terr.terrainData.heightmapWidth ? xpos < 0 ? xpos + size : size : size - ((xpos + size) - terr.terrainData.heightmapWidth);
+        sizeHeight = (ypos + size) < terr.terrainData.heightmapHeight ? ypos < 0 ? ypos + size : size : size - ((ypos + size) - terr.terrainData.heightmapHeight);
+        xpos = xpos < 0 ? 0 : xpos;
+        ypos = ypos < 0 ? 0 : ypos;
+        return terr.terrainData.GetHeights(xpos, ypos, sizeWidth, sizeHeight);
     }
 
 
