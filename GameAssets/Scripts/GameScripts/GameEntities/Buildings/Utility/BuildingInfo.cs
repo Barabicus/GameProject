@@ -4,6 +4,7 @@ using System.Collections;
 public class BuildingInfo : MonoBehaviour {
 
     public string BuildingName;
+    public Texture2D BuildingIcon;
     public int RequiredBuildUnits;
     public ResourceType[] requiredResources;
     public int[] requiredResourceAmount;
@@ -26,6 +27,7 @@ public class BuildingInfo : MonoBehaviour {
         this.requiredResourceAmount = info.requiredResourceAmount;
         this.placeType = info.placeType;
         this.factionFlags = info.factionFlags;
+        this.BuildingIcon = BuildingIcon;
     }
 
 }

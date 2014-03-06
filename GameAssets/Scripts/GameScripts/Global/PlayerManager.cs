@@ -7,11 +7,8 @@ public class PlayerManager : MonoBehaviour
 
     #region Fields
     public int maxPopulation = 5;
-    public CityManager cityManager;
 
     private int _currentPopulation = 0;
-    private int _lifeForce = 0;
-    private int _maxLifeForce = 5000;
     private float _lastTimeForceTick;
     private static PlayerManager _instance;
 
@@ -34,14 +31,6 @@ public class PlayerManager : MonoBehaviour
     public int MaxPopulation
     {
         get { return maxPopulation; }
-    }
-    public int LifeForce { get { return _lifeForce; } }
-    public string LifeForceParsed
-    {
-        get
-        {
-            return _lifeForce.ToString();
-        }
     }
     #endregion
 
@@ -77,10 +66,5 @@ public class PlayerManager : MonoBehaviour
 	
 	// Update is called once per frame
 	void Update () {
-        if (Time.time - _lastTimeForceTick > 10 && _lifeForce != _maxLifeForce)
-        {
-            _lastTimeForceTick = Time.time;
-            _lifeForce = Mathf.Min(_lifeForce + 5, _maxLifeForce);
-        }
 	}
 }

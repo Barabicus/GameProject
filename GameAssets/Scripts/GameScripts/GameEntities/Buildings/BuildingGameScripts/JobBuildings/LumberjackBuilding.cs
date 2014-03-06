@@ -5,8 +5,6 @@ using System;
 
 public class LumberjackBuilding : JobBuilding
 {
-    List<Mob> LumberWorkers = new List<Mob>();
-
     public override void PerformAction(PerformActionEvent actionEvent)
     {
         base.PerformAction(actionEvent);
@@ -20,7 +18,7 @@ public class LumberjackBuilding : JobBuilding
                 {
                     case ActivityState.Supplying:
                         Resource.AddResource(ResourceType.Wood, m.Resource.RemoveResource(ResourceType.Wood, 10));
-                        if (Resource.CurrentResources[ResourceType.Wood] > 200)
+                        if (Resource.CurrentResources[ResourceType.Wood] > 20000)
                         {
                             m.CurrentActivity = ActivityState.None;
                         }
@@ -42,36 +40,32 @@ public class LumberjackBuilding : JobBuilding
     protected override void Tick()
     {
         base.Tick();
-        if (Resource.CurrentResources[ResourceType.Wood] < 200 && LumberWorkers.Count != 3)
+        if (Resource.CurrentResources[ResourceType.Wood] < 200)
         {
             foreach (Mob m in Workers)
             {
-                if (LumberWorkers.Count == 3)
-                    break;
-                if (LumberWorkers.Contains(m))
-                    continue;
-                LumberWorkers.Add(m);
-                if (m.JobTask == null)
+                if (m.JobTask != LumberTask)
                 {
                     m.JobTask = LumberTask;
                 }
             }
         }
+
     }
 
     void LumberTask(Mob mob)
     {
         if (mob.ActionEntity == null)
         {
-            foreach (Collider c in Physics.OverlapSphere(transform.position, 50f, 1 << 11))
+            Collider[] c = Physics.OverlapSphere(transform.position, 50f, 1 << 11);
+            List<Collider> cl = new List<Collider>();
+            for (int i = 0; i < c.Length; i++)
             {
-                if (c.tag.Equals("Tree"))
-                {
-                    mob.PerformAction(new PerformActionEvent(c.GetComponent<WorldResource>()));
-                    break;
-                }
+                if (c[i].tag.Equals("Tree"))
+                    cl.Add(c[i]);
             }
-
+            if (cl.Count > 0)
+                mob.PerformAction(new PerformActionEvent(cl[UnityEngine.Random.Range(0, cl.Count)].GetComponent<WorldResource>()));
         }
 
         if (mob.Resource.CurrentResources[ResourceType.Wood] >= 10 && mob.CurrentActivity != ActivityState.Supplying)

@@ -54,6 +54,7 @@ public class CityManager : Building
         _buildings = new List<Building>();
         _citizens = new List<Mob>();
         _freeHouses = new List<House>();
+        _spawnPoint = transform.FindChild("_SpawnPoint");
     }
 
     protected override void Start()
@@ -140,22 +141,12 @@ public class CityManager : Building
     void Update()
     {
         base.Update();
-        if (Input.GetKeyDown(KeyCode.I))
-        {
-            //    Mob m = PlayerManager.Instance.SpawnMonster(Random.Range(0, 3), _spawnPoint, spawnParticles);
-            Mob m = PlayerManager.Instance.SpawnMonster(0, _spawnPoint, spawnParticles);
-            m.FactionFlags = global::FactionFlags.one;
-            m.EnemyFlags = global::FactionFlags.two;
-            if (m != null)
-            {
-                m.CityManager = this;
-                _citizens.Add(m);
-            }
-        }
+
         if (Input.GetKeyDown(KeyCode.O))
         {
-            //    Mob m = PlayerManager.Instance.SpawnMonster(Random.Range(0, 3), _spawnPoint, spawnParticles);
             Mob m = PlayerManager.Instance.SpawnMonster(1, _spawnPoint, spawnParticles);
+            if (m == null)
+                return;
             m.FactionFlags = global::FactionFlags.one;
             m.EnemyFlags = global::FactionFlags.two;
             if (m != null)

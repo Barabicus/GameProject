@@ -10,6 +10,7 @@ public class BuildingPlaceController : Controller
     #region Fields
 
     public int placeDistance = 500;
+    public Vector3 gridSize;
     public Color canPlaceColor;
     public Color cantPlaceColor;
 
@@ -118,14 +119,19 @@ public class BuildingPlaceController : Controller
                 if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, placeDistance, 1 << 9) && hit.collider.tag.Equals("Ground"))
                 {
                     BuildingPreview.gameObject.SetActive(true);
-                    BuildingPreview.position = hit.point;
+                    BuildingPreview.position = new Vector3(Mathf.Round(hit.point.x / gridSize.x) * gridSize.x,
+hit.point.y,
+Mathf.Round(hit.point.z / gridSize.z) * gridSize.z);
+
                     if (Input.GetMouseButtonDown(1))
                     {
                         BuildingPreview.Rotate(Vector3.up, 90f);
                     }
                     if (Input.GetMouseButtonDown(0))
                     {
-                        _placePosition = hit.point;
+                        _placePosition = new Vector3(Mathf.Round(hit.point.x / gridSize.x) * gridSize.x,
+hit.point.y,
+Mathf.Round(hit.point.z / gridSize.z) * gridSize.z);
                         switch (_placeType)
                         {
                             case PlaceType.Single:

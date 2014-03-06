@@ -7,15 +7,11 @@ using System.Collections;
 public class AddCitizen : MonoBehaviour {
 
     public CityManager cityManager;
-    public Mob[] citizens;
 
 	// Use this for initialization
     void Start()
     {
-        foreach (Mob m in citizens)
-        {
-            cityManager.AddCitizen(m);
-        }
+        cityManager.AddCitizen(gameObject.GetComponent<Mob>());
         Destroy(this);
     }
 	

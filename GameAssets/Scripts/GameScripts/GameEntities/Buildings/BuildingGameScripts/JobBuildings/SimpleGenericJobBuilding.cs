@@ -27,10 +27,7 @@ public class SimpleGenericJobBuilding : JobBuilding
         {
             case "Mob":
                 Mob m = actionEvent.entity as Mob;
-                if (!Workers.Contains(m))
-                {
-                    AddWorker(actionEvent.entity as Mob);
-                }
+                AddWorker(actionEvent.entity as Mob);
 
                 switch (m.CurrentActivity)
                 {
@@ -134,7 +131,7 @@ public class SimpleGenericJobBuilding : JobBuilding
             }
 
         }
-        
+
         if (mob.Resource.CurrentResources[ResourceType.Wood] >= 10 && mob.CurrentActivity != ActivityState.Supplying)
         {
             // We have enough resources, time to supply

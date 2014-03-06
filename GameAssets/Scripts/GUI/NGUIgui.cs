@@ -18,9 +18,16 @@ public class NGUIgui : MonoBehaviour
 
     void Start()
     {
-        _stateCont = StateController.Instance;
-        // Set the select controller to selection initially
-        _stateCont.ControllerState = ControllerState.Selection;
+        try
+        {
+            _stateCont = StateController.Instance;
+            // Set the select controller to selection initially
+            _stateCont.ControllerState = ControllerState.Selection;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError("Exception");
+        }
     }
 
     #endregion

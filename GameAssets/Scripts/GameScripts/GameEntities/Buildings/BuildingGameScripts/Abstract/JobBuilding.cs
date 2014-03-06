@@ -27,8 +27,10 @@ public abstract class JobBuilding : Building {
     public bool AddWorker(Mob m)
     {
         // Cant add another worker
-        if (_workers.Count >= maxWorkers || _workers.Contains(m) || m.HasJob)
+        if (_workers.Count >= maxWorkers || _workers.Contains(m))
             return false;
+        if (m.JobBuilding != null)
+            m.JobBuilding.RemoveWorker(m);
         m.JobBuilding = this;
         _workers.Add(m);
         return true;
@@ -39,6 +41,7 @@ public abstract class JobBuilding : Building {
         if (_workers.Contains(m))
         {
             m.JobBuilding = null;
+            m.JobTask = null;
             _workers.Remove(m);
             return true;
         }

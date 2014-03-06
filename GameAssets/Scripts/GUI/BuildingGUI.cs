@@ -1,23 +1,25 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEditor;
 
 public class BuildingGUI : MonoBehaviour
 {
 
-    private UIGrid buildingGrid;
+    public UIGrid buildingGrid;
     public Transform buildingGridPrefab;
 
     // Use this for initialization
     void Start()
     {
-        buildingGrid = transform.FindChild("BuildingsList/ScrollView/Grid").GetComponent<UIGrid>();
         for (int i = 0; i < BuildingList.Instance.buildings.Length; i++)
         {
             Transform t = Instantiate(buildingGridPrefab) as Transform;
             t.parent = buildingGrid.transform;
             t.localScale = new Vector3(1, 1, 1);
             t.localPosition = Vector3.zero;
-            t.GetComponent<UILabel>().text = BuildingList.Instance.buildings[i].GetComponent<BuildingInfo>().BuildingName;
+       //     t.GetComponent<UILabel>().text = BuildingList.Instance.buildings[i].GetComponent<BuildingInfo>().BuildingName;
+       //     t.GetComponent<UITexture>().mainTexture = AssetPreview.GetAssetPreview(BuildingList.Instance.buildings[i]);
+
 
             Transform _blueprintRef = BuildingList.Instance.BuildingBlueprintPrefabs[i];
             Transform _previewRef = BuildingList.Instance.BuildingPreviewPrefabs[i];

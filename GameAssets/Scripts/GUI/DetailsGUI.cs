@@ -11,6 +11,6 @@ public class DetailsGUI : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
-        lifeForce.text = PlayerManager.Instance.LifeForceParsed;
+
 	}
 }
