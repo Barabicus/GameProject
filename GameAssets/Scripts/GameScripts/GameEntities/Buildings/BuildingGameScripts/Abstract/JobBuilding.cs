@@ -19,6 +19,18 @@ public abstract class JobBuilding : Building {
         _workers = new List<Mob>();
     }
 
+    protected override void Tick()
+    {
+        base.Tick();
+        foreach (Mob m in CityManager.Citizens)
+        {
+            if (Workers.Count == maxWorkers)
+                break;
+            if (!m.HasJobBuilding)
+                AddWorker(m);
+        }
+    }
+
     /// <summary>
     /// Add a worker returns true if the worker was added
     /// </summary>

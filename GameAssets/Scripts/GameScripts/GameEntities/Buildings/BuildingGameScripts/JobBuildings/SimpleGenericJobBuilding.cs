@@ -6,8 +6,8 @@ public class SimpleGenericJobBuilding : JobBuilding
 {
     List<BuildingConstructor> blueprints;
 
-    List<Mob> LumberWorkers = new List<Mob>();
-    List<Mob> BuilderWorkers = new List<Mob>();
+    Mob lumberWorker;
+    Mob builderWorker;
 
     protected override void Start()
     {
@@ -54,42 +54,24 @@ public class SimpleGenericJobBuilding : JobBuilding
     protected override void Tick()
     {
         base.Tick();
-        if (Resource.CurrentResources[ResourceType.Wood] < 200 && LumberWorkers.Count != 3)
-        {
-            foreach (Mob m in Workers)
-            {
-                if (LumberWorkers.Count == 3)
-                    break;
-                if (LumberWorkers.Contains(m) || BuilderWorkers.Contains(m))
-                    continue;
-                LumberWorkers.Add(m);
-                if (m.JobTask == null)
-                {
-                    m.JobTask = LumberTask;
-                }
-            }
-        }
-        if (blueprints.Count > 0 && BuilderWorkers.Count != 3)
-        {
-            foreach (Mob m in Workers)
-            {
-                if (BuilderWorkers.Count == 3)
-                    break;
-                if (LumberWorkers.Contains(m) || BuilderWorkers.Contains(m))
-                    continue;
-                BuilderWorkers.Add(m);
-                if (m.JobTask == null)
-                {
-                    m.JobTask = BuildTask;
-                }
-            }
-        }
 
+        if (Workers.Count > 0)
+            lumberWorker = Workers[0];
+
+        if (Workers.Count > 1)
+            builderWorker = Workers[1];
+
+
+        if (lumberWorker != null && lumberWorker.JobTask != LumberTask)
+            lumberWorker.JobTask = LumberTask;
+
+        if (builderWorker != null && builderWorker.JobTask != BuildTask)
+            builderWorker.JobTask = BuildTask;
     }
 
     void BuildTask(Mob mob)
     {
-        Debug.Log(mob.CityManager + " : " + mob.House);
+        Debug.Log("Build: " + blueprints.Count);
         foreach (BuildingConstructor bc in blueprints)
         {
             if (!bc.HasBeenSupplied)

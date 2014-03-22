@@ -99,7 +99,7 @@ public class CityManager : Building
         if (_citizens.Contains(m))
             return false;
         _citizens.Add(m);
-        if (!m.HasJob)
+        if (!m.HasJobBuilding)
             _unemployedCitizens.Add(m);
         if (m.CityManager != null)
             m.CityManager.RemoveCitizen(m);

@@ -1,18 +1,20 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class HouseBuildingControl : MonoBehaviour {
+public class HouseBuildingControl : BuildingControl {
 
     House house;
+    public UILabel residentsNumber;
 
 	// Use this for initialization
     void Start()
     {
-        house = GetComponent<House>();
+        house = Building.GetComponent<House>();
     }
 	
 	// Update is called once per frame
-	void Update () {
-	
-	}
+    void Update()
+    {
+        residentsNumber.text = house.CurrentResidents.Count + "";
+    }
 }

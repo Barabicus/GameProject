@@ -93,9 +93,13 @@ public class Mob : ActiveEntity
             _jobBuilding = value;
         }
     }
-    public bool HasJob
+    public bool HasJobBuilding
     {
         get { return _jobBuilding != null; }
+    }
+    public bool HasJobTask
+    {
+        get { return JobTask == null; }
     }
     public CityManager CityManager
     {

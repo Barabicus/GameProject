@@ -12,12 +12,12 @@ public class Building : ActiveEntity
     public float tickFrequency = 5;
     public BuildingCategory buildingCategory;
     public bool isInvincible = false;
-    public GameObject controlPrefab;
+    public BuildingControl controlPrefab;
 
     protected int currentHP;
     public BuildState buildState = BuildState.Constructed;
 
-    private GameObject _controlInstance;
+    private BuildingControl _controlInstance;
     private CityManager _cityManager;
     private FactionFlags _factionFlags = FactionFlags.None;
     private FactionFlags _enemyFlags = FactionFlags.None;
@@ -93,16 +93,14 @@ public class Building : ActiveEntity
     protected override void Start()
     {
         base.Start();
-
         if (HUDRoot.go != null && controlPrefab != null)
         {
-            _controlInstance = NGUITools.AddChild(HUDRoot.go, controlPrefab);
+            _controlInstance = NGUITools.AddChild(HUDRoot.go, controlPrefab.gameObject).GetComponent<BuildingControl>();
+            _controlInstance.Building = this;
             // Make the UI follow the target
-            _controlInstance.AddComponent<UIFollowTarget>().target = transform.FindChild("_pivot");
-            _controlInstance.SetActive(false);
+            _controlInstance.gameObject.AddComponent<UIFollowTarget>().target = transform.FindChild("_pivot");
+            _controlInstance.gameObject.SetActive(false);
         }
-        
-
         _resource = GetComponent<Resource>();
         _lastTick = Time.time;
         transform.parent.GetComponent<IslandManager>().cityManager.AddBuilding(this);
@@ -157,13 +155,15 @@ public class Building : ActiveEntity
     /// Building tick. Used to advance building progression if any exists. For example
     /// if a building is producing some sort of resource progrssion will be added via the tick.
     /// </summary>
-    protected virtual void Tick() {}
+    protected virtual void Tick() { }
 
     void OnMouseDown()
     {
+        if (UICamera.hoveredObject)
+            return;
         if (_controlInstance != null)
         {
-            BuildControlsGUIManager.Instance.CurrentControlBox = _controlInstance;
+            BuildControlsGUIManager.Instance.CurrentControlBox = _controlInstance.gameObject;
         }
     }
 
