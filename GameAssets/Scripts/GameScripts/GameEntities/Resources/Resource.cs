@@ -51,6 +51,7 @@ public class Resource : MonoBehaviour
     {
         ResourceWeight.Add(ResourceType.Wood, 2);
         ResourceWeight.Add(ResourceType.Stone, 5);
+        ResourceWeight.Add(ResourceType.Meat, 1);
     }
     public void Awake()
     {
@@ -122,6 +123,17 @@ public class Resource : MonoBehaviour
         return rtrn;
     }
 
+    /// <summary>
+    /// Transfers resources from the other container into this container
+    /// </summary>
+    /// <param name="otherContainer"></param>
+    /// <param name="type"></param>
+    /// <param name="amount"></param>
+    public int TransferResources(Resource otherContainer, ResourceType type, int amount)
+    {
+        return AddResource(type, otherContainer.RemoveResource(type, amount));
+    }
+
 
     public override string ToString()
     {
@@ -142,6 +154,7 @@ public class Resource : MonoBehaviour
 public enum ResourceType
 {
     Wood,
-    Stone
+    Stone,
+    Meat
 }
 

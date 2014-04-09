@@ -5,37 +5,6 @@ using System;
 
 public class LumberjackBuilding : JobBuilding
 {
-    public override void PerformAction(PerformActionEvent actionEvent)
-    {
-        base.PerformAction(actionEvent);
-        switch (actionEvent.tag)
-        {
-            case "Mob":
-                Mob m = actionEvent.entity as Mob;
-                AddWorker(m);
-
-                switch (m.CurrentActivity)
-                {
-                    case ActivityState.Supplying:
-                        Resource.AddResource(ResourceType.Wood, m.Resource.RemoveResource(ResourceType.Wood, 10));
-                        if (Resource.CurrentResources[ResourceType.Wood] > 20000)
-                        {
-                            m.CurrentActivity = ActivityState.None;
-                        }
-                        if (m.Resource.CurrentResources[ResourceType.Wood] == 0)
-                        {
-                            m.CurrentActivity = ActivityState.None;
-                        }
-                        break;
-                    case ActivityState.Retrieving:
-                        // Give Resource
-                        m.Resource.AddResource(ResourceType.Wood, Resource.RemoveResource(ResourceType.Wood, 10));
-                        break;
-                }
-                break;
-        }
-    }
-
 
     protected override void Tick()
     {
@@ -55,7 +24,7 @@ public class LumberjackBuilding : JobBuilding
 
     void LumberTask(Mob mob)
     {
-        if (mob.ActionEntity == null)
+        if (mob.CurrentActivity == ActivityState.None)
         {
             Collider[] c = Physics.OverlapSphere(transform.position, 50f, 1 << 11);
             List<Collider> cl = new List<Collider>();
@@ -65,14 +34,15 @@ public class LumberjackBuilding : JobBuilding
                     cl.Add(c[i]);
             }
             if (cl.Count > 0)
-                mob.PerformAction(new PerformActionEvent(cl[UnityEngine.Random.Range(0, cl.Count)].GetComponent<WorldResource>()));
+                mob.PerformAction(new PerformActionVariables(cl[UnityEngine.Random.Range(0, cl.Count)].GetComponent<WorldResource>()));
         }
 
         if (mob.Resource.CurrentResources[ResourceType.Wood] >= 10 && mob.CurrentActivity != ActivityState.Supplying)
         {
             // We have enough resources, time to supply
             mob.CurrentActivity = ActivityState.Supplying;
-            mob.SetEntityAndFollow(this);
+            mob.PerformActionVariables = new PerformActionVariables(mob, ResourceType.Wood, 10);
+            mob.SetEntityAndFollow(CityManager.FindStorageBuildings()[0]);
         }
     }
 

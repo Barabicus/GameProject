@@ -83,13 +83,13 @@ public abstract class ActiveEntity : GameEntity, IDamageable, IFactionFlag
     /// the stack when exiting the scope of the method call which has the added benefit of saving the initilization of
     /// otherwise useless objects on the heap.
     /// </summary>
-    public virtual void PerformAction(PerformActionEvent actionEvent) { }
+    public virtual void PerformAction(PerformActionVariables actionVariables) { }
 
 
 }
 
 
-public struct PerformActionEvent
+public struct PerformActionVariables
 {
     public ActiveEntity entity;
     public string tag;
@@ -98,8 +98,9 @@ public struct PerformActionEvent
     public int[] intArgs;
     public string[] stringArgs;
     public Vector3[] vector3Args;
+    public ResourceType[] resourceTypesArgs;
 
-    public PerformActionEvent(ActiveEntity entity)
+    public PerformActionVariables(ActiveEntity entity)
     {
         this.entity = entity;
         this.tag = entity.tag;
@@ -107,9 +108,53 @@ public struct PerformActionEvent
         this.intArgs = new int[0];
         this.stringArgs = new string[0];
         this.vector3Args = new Vector3[0];
+        this.resourceTypesArgs = new ResourceType[0];
     }
 
-    public PerformActionEvent(ActiveEntity entity, string tag)
+    public PerformActionVariables(ActiveEntity entity, ResourceType resourceTypeArgs)
+    {
+        this.entity = entity;
+        this.tag = entity.tag;
+        this.floatArgs = new float[0];
+        this.intArgs = new int[0];
+        this.stringArgs = new string[0];
+        this.vector3Args = new Vector3[0];
+        this.resourceTypesArgs = new ResourceType[]{resourceTypeArgs};
+    }
+    public PerformActionVariables(ActiveEntity entity, ResourceType resourceTypeArgs, int intArgs)
+    {
+        this.entity = entity;
+        this.tag = entity.tag;
+        this.floatArgs = new float[0];
+        this.intArgs = new int[]{intArgs};
+        this.stringArgs = new string[0];
+        this.vector3Args = new Vector3[0];
+        this.resourceTypesArgs = new ResourceType[] { resourceTypeArgs };
+    }
+
+    public PerformActionVariables(ActiveEntity entity, ResourceType[] resourceTypeArgs)
+    {
+        this.entity = entity;
+        this.tag = entity.tag;
+        this.floatArgs = new float[0];
+        this.intArgs = new int[0];
+        this.stringArgs = new string[0];
+        this.vector3Args = new Vector3[0];
+        this.resourceTypesArgs = resourceTypeArgs;
+    }
+
+    public PerformActionVariables(ActiveEntity entity, ResourceType[] resourceTypeArgs, int[] intArgs)
+    {
+        this.entity = entity;
+        this.tag = entity.tag;
+        this.floatArgs = new float[0];
+        this.intArgs = intArgs;
+        this.stringArgs = new string[0];
+        this.vector3Args = new Vector3[0];
+        this.resourceTypesArgs = resourceTypeArgs;
+    }
+
+    public PerformActionVariables(ActiveEntity entity, string tag)
     {
         this.entity = entity;
         this.tag = tag;
@@ -117,9 +162,10 @@ public struct PerformActionEvent
         this.intArgs = new int[0];
         this.stringArgs = new string[0];
         this.vector3Args = new Vector3[0];
+        this.resourceTypesArgs = new ResourceType[0];
     }
 
-    public PerformActionEvent(ActiveEntity entity, string tag, float[] floatArgs, int[] intArgs, string[] stringArgs, Vector3[] vector3Args)
+    public PerformActionVariables(ActiveEntity entity, string tag, float[] floatArgs, int[] intArgs, string[] stringArgs, Vector3[] vector3Args)
     {
         this.entity = entity;
         this.tag = tag;
@@ -127,9 +173,10 @@ public struct PerformActionEvent
         this.intArgs = intArgs;
         this.stringArgs = stringArgs;
         this.vector3Args = vector3Args;
+        this.resourceTypesArgs = new ResourceType[0];
     }
 
-    public PerformActionEvent(ActiveEntity entity, string tag, Vector3[] vector3Args)
+    public PerformActionVariables(ActiveEntity entity, string tag, Vector3[] vector3Args)
     {
         this.entity = entity;
         this.tag = tag;
@@ -137,9 +184,10 @@ public struct PerformActionEvent
         this.floatArgs = new float[0];
         this.intArgs = new int[0];
         this.stringArgs = new string[0];
+        this.resourceTypesArgs = new ResourceType[0];
     }
 
-    public PerformActionEvent(ActiveEntity entity, string tag, int[] intArgs)
+    public PerformActionVariables(ActiveEntity entity, string tag, int[] intArgs)
     {
         this.entity = entity;
         this.tag = tag;
@@ -147,9 +195,10 @@ public struct PerformActionEvent
         this.floatArgs = new float[0];
         this.intArgs = intArgs;
         this.stringArgs = new string[0];
+        this.resourceTypesArgs = new ResourceType[0];
     }
 
-    public PerformActionEvent(ActiveEntity entity, string tag, float[] floatArgs)
+    public PerformActionVariables(ActiveEntity entity, string tag, float[] floatArgs)
     {
         this.entity = entity;
         this.tag = tag;
@@ -157,9 +206,10 @@ public struct PerformActionEvent
         this.floatArgs = floatArgs;
         this.intArgs = new int[0];
         this.stringArgs = new string[0];
+        this.resourceTypesArgs = new ResourceType[0];
     }
 
-    public PerformActionEvent(ActiveEntity entity, string tag, string[] stringArgs)
+    public PerformActionVariables(ActiveEntity entity, string tag, string[] stringArgs)
     {
         this.entity = entity;
         this.tag = tag;
@@ -167,6 +217,7 @@ public struct PerformActionEvent
         this.floatArgs = new float[0];
         this.intArgs = new int[0];
         this.stringArgs = stringArgs;
+        this.resourceTypesArgs = new ResourceType[0];
     }
 
 }

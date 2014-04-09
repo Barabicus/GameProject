@@ -77,10 +77,16 @@ public class Mob : ActiveEntity
     private CityManager _cityManager;
     private Gender _gender;
     private JobBuilding _jobBuilding;
+    private PerformActionVariables _performActionVariables;
 
     #endregion
 
     #region Properties
+    public PerformActionVariables PerformActionVariables
+    {
+        get { return _performActionVariables; }
+        set { _performActionVariables = value; }
+    }
     public JobBuilding JobBuilding
     {
         get { return _jobBuilding; }
@@ -191,6 +197,11 @@ public class Mob : ActiveEntity
                     // Reset values
                     ActionEntity = null;
                     Animator.SetBool("weaponDrawn", false);
+                    // Go Home
+                    if (JobBuilding != null)
+                        SetEntityAndFollow(JobBuilding);
+                    else if (House != null)
+                        SetEntityAndFollow(House);
                     break;
             }
             _activityState = value;
@@ -394,26 +405,26 @@ public class Mob : ActiveEntity
                 case ActivityState.Supplying:
                     if (distanceToTarget() < 10f)
                     {
-                        TryPerformAction(new PerformActionEvent(this, tag), ActionEntity);
+                        TryPerformAction(PerformActionVariables, ActionEntity);
                     }
                     break;
                 case ActivityState.Woodcutting:
                     if (distanceToTarget() < 10f)
                     {
-                        TryPerformAction(new PerformActionEvent(this, tag), ActionEntity);
+                        TryPerformAction(new PerformActionVariables(this, tag), ActionEntity);
                         Animator.SetTrigger("chopWood");
                     }
                     break;
                 case ActivityState.Retrieving:
                     if (distanceToTarget() < 10f)
                     {
-                        TryPerformAction(new PerformActionEvent(this), ActionEntity);
+                        TryPerformAction(PerformActionVariables, ActionEntity);
                     }
                     break;
                 case ActivityState.Building:
                     if (distanceToTarget() < 10f)
                     {
-                        TryPerformAction(new PerformActionEvent(this), ActionEntity);
+                        TryPerformAction(PerformActionVariables, ActionEntity);
                     }
                     break;
             }
@@ -427,7 +438,7 @@ public class Mob : ActiveEntity
     /// i.e how fast a mob can perform an action in succession.
     /// </summary>
     /// <param name="actionEvent"></param>
-    private void TryPerformAction(PerformActionEvent actionEvent, ActiveEntity otherEntity)
+    private void TryPerformAction(PerformActionVariables actionEvent, ActiveEntity otherEntity)
     {
         if (Time.time - _lastActionTime > skills.actionSpeed)
         {
@@ -440,7 +451,7 @@ public class Mob : ActiveEntity
     /// Have this mob react to an ActionEvent
     /// </summary>
     /// <param name="actionEvent"></param>
-    public override void PerformAction(PerformActionEvent actionEvent)
+    public override void PerformAction(PerformActionVariables actionEvent)
     {
         base.PerformAction(actionEvent);
         // Avoid trying to set commands on self
@@ -473,19 +484,19 @@ public class Mob : ActiveEntity
                 }
                 else
                 {
-                    actionEvent.entity.PerformAction(new PerformActionEvent(this));
+                    actionEvent.entity.PerformAction(new PerformActionVariables(this));
                 }
                 break;
             case "Tree":
-                    CurrentActivity = ActivityState.Woodcutting;
-                    SetEntityAndFollow(actionEvent.entity);
+                CurrentActivity = ActivityState.Woodcutting;
+                SetEntityAndFollow(actionEvent.entity);
                 break;
             case "BluePrint":
-                    if (!IsEnemey(actionEvent.entity.FactionFlags))
-                    {
-                        CurrentActivity = ActivityState.Supplying;
-                        SetEntityAndFollow(actionEvent.entity);
-                    }
+                if (!IsEnemey(actionEvent.entity.FactionFlags))
+                {
+                    CurrentActivity = ActivityState.Supplying;
+                    SetEntityAndFollow(actionEvent.entity);
+                }
                 break;
         }
     }

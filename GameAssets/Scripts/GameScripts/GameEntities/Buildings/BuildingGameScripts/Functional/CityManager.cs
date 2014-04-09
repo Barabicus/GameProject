@@ -27,15 +27,23 @@ public class CityManager : Building
     /// </summary>
     private List<Mob> _unemployedCitizens;
     /// <summary>
-    /// List of houses that have free space
+    /// List of houses
     /// </summary>
-    private List<House> _freeHouses;
+    private List<House> _houses;
+    private List<ResourceOrderRequest> _resourceOrderRequests;
 
     public ParticleSystem[] spawnParticles;
 
     #endregion
 
     #region Properties
+    public List<ResourceOrderRequest> ResourceOrderRequests
+    {
+        get
+        {
+            return _resourceOrderRequests.FindAll(m => { return m.hasContract != null; });
+        }
+    }
     public List<Mob> UnemployedCitizens
     {
         get { return _unemployedCitizens; }
@@ -53,8 +61,9 @@ public class CityManager : Building
         _unemployedCitizens = new List<Mob>();
         _buildings = new List<Building>();
         _citizens = new List<Mob>();
-        _freeHouses = new List<House>();
+        _houses = new List<House>();
         _spawnPoint = transform.FindChild("_SpawnPoint");
+        _resourceOrderRequests = new List<ResourceOrderRequest>();
     }
 
     protected override void Start()
@@ -80,10 +89,6 @@ public class CityManager : Building
         _buildings.Add(building);
         building.CityManager = this;
         building.Destroyed += RemoveBuilding;
-        if (building.GetType() == typeof(ResourceBuilding))
-        {
-            AddResourceContainer((ResourceBuilding)building);
-        }
     }
 
     public void RemoveBuilding(Building building)
@@ -117,19 +122,9 @@ public class CityManager : Building
         return _citizens.Remove(m);
     }
 
-    public void AddResourceContainer(ResourceBuilding building)
+    public void AddResourceOrderRequest(ResourceOrderRequest request)
     {
-        building.Resource.ResourceChanged += UpdateCachedResources;
-        // Cache all of the buildings current resources
-        foreach (ResourceType t in building.Resource.CurrentResources.Keys)
-        {
-            UpdateCachedResources(t, building.Resource.CurrentResources[t]);
-        }
-        // Cache this Resource Containers position
-        // Being a building type, it should never move.
-        _resourcePositions.Add(building.transform.position);
-        // Add the resource reference to the city's current resource pool
-        _resources.Add(building.Resource);
+        _resourceOrderRequests.Add(request);
     }
 
     private void UpdateCachedResources(ResourceType type, int amount)
@@ -138,28 +133,46 @@ public class CityManager : Building
     }
     #endregion
 
-    void Update()
+    protected override void Tick()
     {
-        base.Update();
-
-        if (Input.GetKeyDown(KeyCode.O))
+        base.Tick();
+        if (PlayerManager.Instance.HasPopulationSpace)
         {
-            Mob m = PlayerManager.Instance.SpawnMonster(1, _spawnPoint, spawnParticles);
-            if (m == null)
-                return;
-            m.FactionFlags = global::FactionFlags.one;
-            m.EnemyFlags = global::FactionFlags.two;
-            if (m != null)
+            foreach (House h in _buildings.FindAll(m => m is House))
             {
-                m.CityManager = this;
-                _citizens.Add(m);
+                if (h.HasRoom)
+                {
+                    h.AddResident(PlayerManager.Instance.SpawnMonster(1, _spawnPoint, spawnParticles));
+                    break;
+                }
             }
         }
     }
 
-    public void CheckForJobs(Mob mob)
+    public List<StorageBuilding> FindStorageBuildings()
     {
-       
+        List<StorageBuilding> buildings = new List<StorageBuilding>();
+        foreach (StorageBuilding b in _buildings.FindAll(m => m is StorageBuilding))
+        {
+            buildings.Add(b);
+        }
+        return buildings;
     }
 
+}
+
+
+public struct ResourceOrderRequest
+{
+    public Building building;
+    public Building hasContract;
+    public ResourceType type;
+    public int amount;
+    public ResourceOrderRequest(Building building,ResourceType type, int amount)
+    {
+        this.building = building;
+        this.type = type;
+        this.amount = amount;
+        this.hasContract = null;
+    }
 }

@@ -23,6 +23,11 @@ public class House : Building
             return _currentResidents.AsReadOnly();
         }
     }
+
+    public bool HasRoom
+    {
+        get { return _currentResidents.Count < maxResidents; }
+    }
     #endregion
 
     protected override void Start()
@@ -31,11 +36,13 @@ public class House : Building
         _currentResidents = new List<Mob>();
         foreach (Mob m in tempResidents)
         {
+			if(m == null)
+				continue;
             AddResident(m);
         }
     }
 
-    public override void PerformAction(PerformActionEvent actionEvent)
+    public override void PerformAction(PerformActionVariables actionEvent)
     {
         base.PerformAction(actionEvent);
         switch (actionEvent.tag)
@@ -51,7 +58,9 @@ public class House : Building
         if (_currentResidents.Count < maxResidents && !_currentResidents.Contains(mob))
         {
             mob.Killed += RemoveResident;
-            mob.CityManager = CityManager;
+            mob.FactionFlags = this.FactionFlags;
+            mob.EnemyFlags = this.EnemyFlags;
+            CityManager.AddCitizen(mob);
             mob.House = this;
             _currentResidents.Add(mob);
         }

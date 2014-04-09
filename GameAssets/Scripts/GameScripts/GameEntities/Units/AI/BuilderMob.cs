@@ -17,7 +17,7 @@ public class BuilderMob : Mob {
         base.LivingUpdate();
     }
 
-    public override void PerformAction(PerformActionEvent actionEvent)
+    public override void PerformAction(PerformActionVariables actionEvent)
     {
         base.PerformAction(actionEvent);
         if (actionEvent.entity.tag == "Mob")

@@ -14,6 +14,7 @@ public class BuildControlsGUIManager : MonoBehaviour {
             if (_currentControlBox != null)
                 _currentControlBox.SetActive(false);
             _currentControlBox = value;
+            if(value != null)
             value.SetActive(true);
         }
     }
@@ -26,6 +27,14 @@ public class BuildControlsGUIManager : MonoBehaviour {
     void Awake()
     {
         _instance = this;
+    }
+
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            CurrentControlBox = null;
+        }
     }
 
 	

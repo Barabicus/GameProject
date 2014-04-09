@@ -71,7 +71,7 @@ public class SelectController : Controller
                 {
                         foreach (ActiveEntity t in selectedUnits)
                         {
-                            t.PerformAction(new PerformActionEvent(hit.collider.GetComponent<ActiveEntity>() != null ? hit.collider.GetComponent<ActiveEntity>() : null, hit.collider.tag, new Vector3[]{hit.point}));
+                            t.PerformAction(new PerformActionVariables(hit.collider.GetComponent<ActiveEntity>() != null ? hit.collider.GetComponent<ActiveEntity>() : null, hit.collider.tag, new Vector3[]{hit.point}));
                         }              
 
                 }

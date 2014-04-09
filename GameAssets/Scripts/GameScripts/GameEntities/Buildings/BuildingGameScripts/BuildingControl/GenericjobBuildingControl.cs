@@ -11,7 +11,7 @@ public class GenericjobBuildingControl : BuildingControl {
 	// Use this for initialization
     void Start()
     {
-        building = Building.GetComponent<SimpleGenericJobBuilding>();
+        building = ParentObject.GetComponent<SimpleGenericJobBuilding>();
     }
 	
 	// Update is called once per frame

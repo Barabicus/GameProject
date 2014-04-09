@@ -39,7 +39,11 @@ public class NGUIgui : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.Escape))
             {
                 _stateCont.ControllerState = ControllerState.Selection;
-            }   
+            }
+            if (Input.GetKeyDown(KeyCode.Escape) && Input.GetKeyDown(KeyCode.LeftControl))
+            {
+                Application.Quit();
+            }
     }
     #endregion
 }

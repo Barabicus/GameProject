@@ -8,6 +8,9 @@ public class SimpleGenericJobBuilding : JobBuilding
 
     Mob lumberWorker;
     Mob builderWorker;
+    Mob deliveryWorker;
+
+    List<ResourceOrderRequest> _resourceJobs;
 
     protected override void Start()
     {
@@ -20,7 +23,7 @@ public class SimpleGenericJobBuilding : JobBuilding
         base.Awake();
     }
 
-    public override void PerformAction(PerformActionEvent actionEvent)
+    public override void PerformAction(PerformActionVariables actionEvent)
     {
         base.PerformAction(actionEvent);
         switch (actionEvent.tag)
@@ -33,7 +36,7 @@ public class SimpleGenericJobBuilding : JobBuilding
                 {
                     case ActivityState.Supplying:
                         Resource.AddResource(ResourceType.Wood, m.Resource.RemoveResource(ResourceType.Wood, 10));
-                        if (Resource.CurrentResources[ResourceType.Wood] > 200)
+                        if (Resource.CurrentWeight > Resource.maxWeight)
                         {
                             m.CurrentActivity = ActivityState.None;
                         }
@@ -60,27 +63,45 @@ public class SimpleGenericJobBuilding : JobBuilding
 
         if (Workers.Count > 1)
             builderWorker = Workers[1];
-
+        if (Workers.Count > 2)
+            deliveryWorker = Workers[2];
 
         if (lumberWorker != null && lumberWorker.JobTask != LumberTask)
             lumberWorker.JobTask = LumberTask;
 
         if (builderWorker != null && builderWorker.JobTask != BuildTask)
             builderWorker.JobTask = BuildTask;
+
+        if (deliveryWorker != null && deliveryWorker.JobTask != DeliveryTask)
+            deliveryWorker.JobTask = DeliveryTask;
+    }
+
+    void DeliveryTask(Mob mob)
+    {
+        if (mob.CurrentActivity == ActivityState.None)
+        {
+            foreach (ResourceOrderRequest rq in CityManager.ResourceOrderRequests)
+            {
+                mob.PerformActionVariables = new PerformActionVariables(mob, rq.type, rq.amount);
+                mob.SetEntityAndFollow(rq.building);
+            }
+        }
     }
 
     void BuildTask(Mob mob)
     {
-        Debug.Log("Build: " + blueprints.Count);
         foreach (BuildingConstructor bc in blueprints)
         {
             if (!bc.HasBeenSupplied)
             {
+                if (1 == 1)
+                    return;
                 if (mob.Resource.CurrentResources[ResourceType.Wood] == 0 && mob.ActionEntity != this)
                 {
                     // Need wood, get wood
                     mob.CurrentActivity = ActivityState.Retrieving;
-                    mob.SetEntityAndFollow(this);
+                    mob.PerformActionVariables = new PerformActionVariables(mob, ResourceType.Wood, 10);
+                    mob.SetEntityAndFollow(CityManager.FindStorageBuildings()[0]);
                 }
                 else if (mob.Resource.CurrentResources[ResourceType.Wood] >= 1)
                 {
@@ -101,24 +122,25 @@ public class SimpleGenericJobBuilding : JobBuilding
 
     void LumberTask(Mob mob)
     {
-        if (mob.ActionEntity == null)
+        if (mob.CurrentActivity == ActivityState.None)
         {
-            foreach (Collider c in Physics.OverlapSphere(transform.position, 50f, 1 << 11))
+            Collider[] c = Physics.OverlapSphere(transform.position, 50f, 1 << 11);
+            List<Collider> cl = new List<Collider>();
+            for (int i = 0; i < c.Length; i++)
             {
-                if (c.tag.Equals("Tree"))
-                {
-                    mob.PerformAction(new PerformActionEvent(c.GetComponent<WorldResource>()));
-                    break;
-                }
+                if (c[i].tag.Equals("Tree"))
+                    cl.Add(c[i]);
             }
-
+            if (cl.Count > 0)
+                mob.PerformAction(new PerformActionVariables(cl[UnityEngine.Random.Range(0, cl.Count)].GetComponent<WorldResource>()));
         }
 
         if (mob.Resource.CurrentResources[ResourceType.Wood] >= 10 && mob.CurrentActivity != ActivityState.Supplying)
         {
             // We have enough resources, time to supply
             mob.CurrentActivity = ActivityState.Supplying;
-            mob.SetEntityAndFollow(this);
+            mob.PerformActionVariables = new PerformActionVariables(mob, ResourceType.Wood, 10);
+            mob.SetEntityAndFollow(CityManager.FindStorageBuildings()[0]);
         }
     }
 

@@ -2,7 +2,7 @@
 using System.Collections;
 using System;
 
-public class BuildingConstructor : ActiveEntity
+public class BuildingConstructor : Building
 {
 
     #region Fields
@@ -14,13 +14,16 @@ public class BuildingConstructor : ActiveEntity
     /// and will be able to apply more build units per tick based on their ability.
     /// </summary>
     public int requiredBuildUnits;
-    protected int currentBuildUnits = 0;
+    public BuildingControl controlPrefab;
+    int currentBuildUnits = 0;
     public Transform ConstructedPrefab;
     private FactionFlags _factionFlags = FactionFlags.None;
     private ResourceType[] requiredResources;
     private int[] requiredResourceAmount;
     private int[] currentResourceAmount;
     private bool _resourceRequirementMet = false;
+    private BuildingControl _controlInstance;
+
 
     #endregion
 
@@ -55,6 +58,10 @@ public class BuildingConstructor : ActiveEntity
             _factionFlags = value;
         }
     }
+    public int CurrentBuildUnits
+    {
+        get { return currentBuildUnits; }
+    }
 
     #endregion
 
@@ -64,6 +71,16 @@ public class BuildingConstructor : ActiveEntity
     void Start()
     {
         base.Start();
+
+        if (HUDRoot.go != null && controlPrefab != null)
+        {
+            _controlInstance = NGUITools.AddChild(HUDRoot.go, controlPrefab.gameObject).GetComponent<BuildingControl>();
+            _controlInstance.ParentObject = this.gameObject;
+            // Make the UI follow the target
+            _controlInstance.gameObject.AddComponent<UIFollowTarget>().target = transform.FindChild("_pivot");
+            _controlInstance.gameObject.SetActive(false);
+        }
+
         IsHighlightable = false;
         name = GetComponent<BuildingInfo>().BuildingName;
         requiredBuildUnits = GetComponent<BuildingInfo>().RequiredBuildUnits;
@@ -81,6 +98,11 @@ public class BuildingConstructor : ActiveEntity
     void OnDestroy()
     {
         BlueprintList.Instance.Blueprints.Remove(this);
+        if (controlPrefab != null)
+        {
+            BuildControlsGUIManager.Instance.CurrentControlBox = null;
+            Destroy(_controlInstance);
+        }
     }
 
     public override bool Damage(int damage)
@@ -89,7 +111,7 @@ public class BuildingConstructor : ActiveEntity
         currentBuildUnits -= damage;
         if (currentBuildUnits < 0)
         {
-            Destroy(gameObject);
+            Destroy(_controlInstance);
             return true;
         }
         else
@@ -97,7 +119,7 @@ public class BuildingConstructor : ActiveEntity
 
     }
 
-    public override void PerformAction(PerformActionEvent actionEvent)
+    public override void PerformAction(PerformActionVariables actionEvent)
     {
         base.PerformAction(actionEvent);
         switch (actionEvent.tag)
@@ -176,6 +198,16 @@ public class BuildingConstructor : ActiveEntity
         else
             return false;
 
+    }
+
+    void OnMouseDown()
+    {
+        if (UICamera.hoveredObject)
+            return;
+        if (_controlInstance != null)
+        {
+            BuildControlsGUIManager.Instance.CurrentControlBox = _controlInstance.gameObject;
+        }
     }
 
     #endregion

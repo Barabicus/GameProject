@@ -9,7 +9,7 @@ public class HouseBuildingControl : BuildingControl {
 	// Use this for initialization
     void Start()
     {
-        house = Building.GetComponent<House>();
+        house = ParentObject.GetComponent<House>();
     }
 	
 	// Update is called once per frame

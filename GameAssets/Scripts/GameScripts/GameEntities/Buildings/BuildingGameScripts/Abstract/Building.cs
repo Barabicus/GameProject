@@ -4,6 +4,7 @@ using System;
 
 [RequireComponent(typeof(BuildingInfo))]
 [RequireComponent(typeof(Resource))]
+[RequireComponent(typeof(DynamicGridObstacle))]
 public class Building : ActiveEntity
 {
 
@@ -96,8 +97,14 @@ public class Building : ActiveEntity
         if (HUDRoot.go != null && controlPrefab != null)
         {
             _controlInstance = NGUITools.AddChild(HUDRoot.go, controlPrefab.gameObject).GetComponent<BuildingControl>();
-            _controlInstance.Building = this;
+            _controlInstance.ParentObject = this.gameObject;
             // Make the UI follow the target
+            if (transform.FindChild("_pivot") == null)
+            {
+                GameObject go = new GameObject("_pivot");
+                go.transform.parent = transform;
+                go.transform.localPosition = Vector3.zero;
+            }
             _controlInstance.gameObject.AddComponent<UIFollowTarget>().target = transform.FindChild("_pivot");
             _controlInstance.gameObject.SetActive(false);
         }

@@ -32,6 +32,10 @@ public class PlayerManager : MonoBehaviour
     {
         get { return maxPopulation; }
     }
+    public bool HasPopulationSpace
+    {
+        get { return _currentPopulation < maxPopulation; }
+    }
     #endregion
 
 	void Start () {

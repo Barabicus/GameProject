@@ -100,7 +100,7 @@ public class WorldResource : ActiveEntity
         }
     }
 
-    public override void PerformAction(PerformActionEvent actionEvent)
+    public override void PerformAction(PerformActionVariables actionEvent)
     {
         base.PerformAction(actionEvent);
         switch (actionEvent.tag)
