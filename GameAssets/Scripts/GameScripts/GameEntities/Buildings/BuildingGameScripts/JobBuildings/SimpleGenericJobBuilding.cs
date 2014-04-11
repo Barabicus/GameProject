@@ -12,6 +12,8 @@ public class SimpleGenericJobBuilding : JobBuilding
 
     List<ResourceOrderRequest> _resourceJobs;
 
+    ResourceOrderRequest? _currentRequest;
+
     protected override void Start()
     {
         base.Start();
@@ -58,6 +60,9 @@ public class SimpleGenericJobBuilding : JobBuilding
     {
         base.Tick();
 
+        if (_currentRequest == null)
+            _currentRequest = CityManager.TakeResourceOrderRequest();
+
         if (Workers.Count > 0)
             lumberWorker = Workers[0];
 
@@ -78,12 +83,24 @@ public class SimpleGenericJobBuilding : JobBuilding
 
     void DeliveryTask(Mob mob)
     {
+        Debug.Log(mob.CurrentActivity);
         if (mob.CurrentActivity == ActivityState.None)
         {
-            foreach (ResourceOrderRequest rq in CityManager.ResourceOrderRequests)
+            // Check if this mob has all the required resources for the construction task
+            if (_currentRequest.HasValue)
             {
-                mob.PerformActionVariables = new PerformActionVariables(mob, rq.type, rq.amount);
-                mob.SetEntityAndFollow(rq.building);
+                // If we don't have any resources 
+                if (mob.Resource.CurrentResources[_currentRequest.Value.type] != _currentRequest.Value.amount && mob.Resource.CurrentResources[_currentRequest.Value.type] < _currentRequest.Value.amount)
+                {
+                    // Get resource from storage house
+                    mob.PerformActionVariables = new PerformActionVariables(mob, _currentRequest.Value.type, Mathf.Abs(mob.Resource.CurrentResources[_currentRequest.Value.type] - _currentRequest.Value.amount));
+                    mob.CurrentActivity = ActivityState.Retrieving;
+                    mob.SetEntityAndFollow(CityManager.FindStorageBuildings()[0]);
+                }
+                else if (mob.Resource.CurrentResources[_currentRequest.Value.type] == _currentRequest.Value.amount)
+                {
+                    mob.CurrentActivity = ActivityState.Supplying;
+                }
             }
         }
     }

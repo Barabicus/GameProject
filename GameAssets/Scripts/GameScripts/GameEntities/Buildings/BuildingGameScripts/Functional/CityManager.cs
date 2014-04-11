@@ -30,20 +30,13 @@ public class CityManager : Building
     /// List of houses
     /// </summary>
     private List<House> _houses;
-    private List<ResourceOrderRequest> _resourceOrderRequests;
+    private Queue<ResourceOrderRequest> _resourceOrderRequests;
 
     public ParticleSystem[] spawnParticles;
 
     #endregion
 
     #region Properties
-    public List<ResourceOrderRequest> ResourceOrderRequests
-    {
-        get
-        {
-            return _resourceOrderRequests.FindAll(m => { return m.hasContract != null; });
-        }
-    }
     public List<Mob> UnemployedCitizens
     {
         get { return _unemployedCitizens; }
@@ -63,7 +56,7 @@ public class CityManager : Building
         _citizens = new List<Mob>();
         _houses = new List<House>();
         _spawnPoint = transform.FindChild("_SpawnPoint");
-        _resourceOrderRequests = new List<ResourceOrderRequest>();
+        _resourceOrderRequests = new Queue<ResourceOrderRequest>();
     }
 
     protected override void Start()
@@ -124,7 +117,15 @@ public class CityManager : Building
 
     public void AddResourceOrderRequest(ResourceOrderRequest request)
     {
-        _resourceOrderRequests.Add(request);
+        _resourceOrderRequests.Enqueue(request);
+        Debug.Log("Q: " + _resourceOrderRequests.Count);
+    }
+
+    public ResourceOrderRequest? TakeResourceOrderRequest()
+    {
+        if (_resourceOrderRequests.Count == 0)
+            return null;
+        return _resourceOrderRequests.Dequeue();
     }
 
     private void UpdateCachedResources(ResourceType type, int amount)
@@ -168,7 +169,8 @@ public struct ResourceOrderRequest
     public Building hasContract;
     public ResourceType type;
     public int amount;
-    public ResourceOrderRequest(Building building,ResourceType type, int amount)
+
+    public ResourceOrderRequest(Building building, ResourceType type, int amount)
     {
         this.building = building;
         this.type = type;

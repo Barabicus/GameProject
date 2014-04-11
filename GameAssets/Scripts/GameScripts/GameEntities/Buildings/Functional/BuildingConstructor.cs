@@ -14,7 +14,6 @@ public class BuildingConstructor : Building
     /// and will be able to apply more build units per tick based on their ability.
     /// </summary>
     public int requiredBuildUnits;
-    public BuildingControl controlPrefab;
     int currentBuildUnits = 0;
     public Transform ConstructedPrefab;
     private FactionFlags _factionFlags = FactionFlags.None;
@@ -22,7 +21,6 @@ public class BuildingConstructor : Building
     private int[] requiredResourceAmount;
     private int[] currentResourceAmount;
     private bool _resourceRequirementMet = false;
-    private BuildingControl _controlInstance;
 
 
     #endregion
@@ -72,15 +70,6 @@ public class BuildingConstructor : Building
     {
         base.Start();
 
-        if (HUDRoot.go != null && controlPrefab != null)
-        {
-            _controlInstance = NGUITools.AddChild(HUDRoot.go, controlPrefab.gameObject).GetComponent<BuildingControl>();
-            _controlInstance.ParentObject = this.gameObject;
-            // Make the UI follow the target
-            _controlInstance.gameObject.AddComponent<UIFollowTarget>().target = transform.FindChild("_pivot");
-            _controlInstance.gameObject.SetActive(false);
-        }
-
         IsHighlightable = false;
         name = GetComponent<BuildingInfo>().BuildingName;
         requiredBuildUnits = GetComponent<BuildingInfo>().RequiredBuildUnits;
@@ -89,6 +78,14 @@ public class BuildingConstructor : Building
         FactionFlags = GetComponent<BuildingInfo>().factionFlags;
         currentResourceAmount = new int[requiredResourceAmount.Length];
         BlueprintList.Instance.Blueprints.Add(this);
+
+        // Add Resource Requests for this building
+        for (int i = 0; i < requiredResources.Length; i++)
+        {
+            Debug.Log("CITY: " + CityManager);
+            CityManager.AddResourceOrderRequest(new ResourceOrderRequest(this, requiredResources[i], requiredResourceAmount[i]));
+        }
+
     }
 
     #endregion
@@ -98,20 +95,15 @@ public class BuildingConstructor : Building
     void OnDestroy()
     {
         BlueprintList.Instance.Blueprints.Remove(this);
-        if (controlPrefab != null)
-        {
-            BuildControlsGUIManager.Instance.CurrentControlBox = null;
-            Destroy(_controlInstance);
-        }
     }
 
-    public override bool Damage(int damage)
+    public new bool Damage(int damage)
     {
         // Substract build units. If build units is less than 0, the blueprint has been destroyed
         currentBuildUnits -= damage;
         if (currentBuildUnits < 0)
         {
-            Destroy(_controlInstance);
+            Destroy(gameObject);
             return true;
         }
         else
@@ -198,16 +190,6 @@ public class BuildingConstructor : Building
         else
             return false;
 
-    }
-
-    void OnMouseDown()
-    {
-        if (UICamera.hoveredObject)
-            return;
-        if (_controlInstance != null)
-        {
-            BuildControlsGUIManager.Instance.CurrentControlBox = _controlInstance.gameObject;
-        }
     }
 
     #endregion

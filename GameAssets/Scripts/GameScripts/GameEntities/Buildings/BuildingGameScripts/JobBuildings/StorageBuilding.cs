@@ -42,7 +42,9 @@ public class StorageBuilding : Building
                         m.CurrentActivity = ActivityState.None;
                     break;
                 case ActivityState.Retrieving:
-                    m.Resource.AddResource(actionEvent.resourceTypesArgs[0], Resource.RemoveResource(actionEvent.resourceTypesArgs[0], actionEvent.intArgs[0]));
+                    m.Resource.TransferResources(Resource, actionEvent.resourceTypesArgs[0], actionEvent.intArgs[0]);
+                    m.CurrentActivity = ActivityState.None;
+                    Debug.Log("setting none");
                     break;
             }
         }

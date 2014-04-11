@@ -65,11 +65,6 @@ public class Resource : MonoBehaviour
 
     #region Logic
 
-    // TO DO
-    public bool HasRoom(Resource type)
-    {
-        return false;
-    }
 
     /// <summary>
     /// Takes a resource type and the amount you want to add in. It stores

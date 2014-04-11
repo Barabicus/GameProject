@@ -174,6 +174,15 @@ public class Building : ActiveEntity
         }
     }
 
+    void OnDestroy()
+    {
+        if (controlPrefab != null)
+        {
+            BuildControlsGUIManager.Instance.CurrentControlBox = null;
+            Destroy(_controlInstance);
+        }
+    }
+
     #endregion
 
 }

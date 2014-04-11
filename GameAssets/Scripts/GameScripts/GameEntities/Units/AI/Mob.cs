@@ -197,11 +197,6 @@ public class Mob : ActiveEntity
                     // Reset values
                     ActionEntity = null;
                     Animator.SetBool("weaponDrawn", false);
-                    // Go Home
-                    if (JobBuilding != null)
-                        SetEntityAndFollow(JobBuilding);
-                    else if (House != null)
-                        SetEntityAndFollow(House);
                     break;
             }
             _activityState = value;
@@ -389,7 +384,10 @@ public class Mob : ActiveEntity
     {
         _attackTime = Math.Max(_attackTime - Time.deltaTime, 0);
         if (ActionEntity == null)
+        {
             CurrentActivity = ActivityState.None;
+            Debug.LogWarning("Action Entity was null, resetting CurrentActivity");
+        }
         if (JobTask != null)
             JobTask(this);
         if (ActionEntity != null)
