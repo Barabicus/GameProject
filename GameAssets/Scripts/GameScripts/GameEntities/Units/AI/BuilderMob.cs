@@ -3,7 +3,7 @@ using System.Collections;
 
 public class BuilderMob : Mob {
 
-    protected override void Start()
+    public override void Start()
     {
         skills.speed = 3;
         FactionFlags = global::FactionFlags.one;

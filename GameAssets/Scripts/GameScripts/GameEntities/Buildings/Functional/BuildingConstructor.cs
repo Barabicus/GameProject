@@ -19,7 +19,6 @@ public class BuildingConstructor : Building
     private FactionFlags _factionFlags = FactionFlags.None;
     private ResourceType[] requiredResources;
     private int[] requiredResourceAmount;
-    private int[] currentResourceAmount;
     private bool _resourceRequirementMet = false;
 
 
@@ -76,14 +75,13 @@ public class BuildingConstructor : Building
         requiredResources = GetComponent<BuildingInfo>().requiredResources;
         requiredResourceAmount = GetComponent<BuildingInfo>().requiredResourceAmount;
         FactionFlags = GetComponent<BuildingInfo>().factionFlags;
-        currentResourceAmount = new int[requiredResourceAmount.Length];
         BlueprintList.Instance.Blueprints.Add(this);
+        Resource.maxWeight = 5000;
 
         // Add Resource Requests for this building
         for (int i = 0; i < requiredResources.Length; i++)
         {
-            Debug.Log("CITY: " + CityManager);
-            CityManager.AddResourceOrderRequest(new ResourceOrderRequest(this, requiredResources[i], requiredResourceAmount[i]));
+            BuildingResourceRequestManager.AddRequest(requiredResources[i], requiredResourceAmount[i]);
         }
 
     }
@@ -124,31 +122,31 @@ public class BuildingConstructor : Building
                         Construct(mob.Skills.buildPower);
                         break;
                     case ActivityState.Supplying:
-                        SupplyResources(mob.Resource);
+                        SupplyResources(mob.Resource, actionEvent);
+                        mob.CurrentActivity = ActivityState.None;
                         break;
                 }
                 break;
         }
     }
 
-    public void SupplyResources(Resource resource)
+    public void SupplyResources(Resource resource, PerformActionVariables actionEvent)
     {
         if (_resourceRequirementMet)
             return;
         // Remove all resources from this container that this building constructor needs to advance.
         for (int i = 0; i < requiredResources.Length; i++)
         {
-            if (currentResourceAmount[i] < requiredResourceAmount[i])
-            {
-                currentResourceAmount[i] += resource.RemoveResource(requiredResources[i], (requiredResourceAmount[i] - currentResourceAmount[i]));
-            }
+            // Get how many resources is required left
+            int transfer = (requiredResourceAmount[i] - Resource[requiredResources[i]]);
+            transfer = actionEvent.intArgs[0] > transfer ? Mathf.Abs(actionEvent.intArgs[0] - transfer) : transfer;
         }
 
         // Perform check to see if we have all the required resources
         _resourceRequirementMet = true;
         for (int i = 0; i < requiredResources.Length; i++)
         {
-            if (currentResourceAmount[i] != requiredResourceAmount[i])
+            if (Resource[requiredResources[i]] != requiredResourceAmount[i])
             {
                 _resourceRequirementMet = false;
                 return;

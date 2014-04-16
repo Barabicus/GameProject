@@ -37,12 +37,12 @@ public class LumberjackBuilding : JobBuilding
                 mob.PerformAction(new PerformActionVariables(cl[UnityEngine.Random.Range(0, cl.Count)].GetComponent<WorldResource>()));
         }
 
-        if (mob.Resource.CurrentResources[ResourceType.Wood] >= 10 && mob.CurrentActivity != ActivityState.Supplying)
+        if (mob.Resource.GetMaxRemainder(ResourceType.Wood) == 0 && mob.CurrentActivity != ActivityState.Supplying)
         {
             // We have enough resources, time to supply
             mob.CurrentActivity = ActivityState.Supplying;
             mob.PerformActionVariables = new PerformActionVariables(mob, ResourceType.Wood, 10);
-            mob.SetEntityAndFollow(CityManager.FindStorageBuildings()[0]);
+            mob.SetEntityAndFollow(CityManager.StorageBuildings[0]);
         }
     }
 

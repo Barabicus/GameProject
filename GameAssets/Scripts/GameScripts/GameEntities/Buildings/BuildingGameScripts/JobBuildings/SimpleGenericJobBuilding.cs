@@ -10,50 +10,17 @@ public class SimpleGenericJobBuilding : JobBuilding
     Mob builderWorker;
     Mob deliveryWorker;
 
-    List<ResourceOrderRequest> _resourceJobs;
+    BuildingResourceRequestManager _currentRequest;
 
-    ResourceOrderRequest? _currentRequest;
-
-    protected override void Start()
+    public override void Start()
     {
         base.Start();
         blueprints = BlueprintList.Instance.Blueprints;
     }
 
-    protected override void Awake()
+    public override void Awake()
     {
         base.Awake();
-    }
-
-    public override void PerformAction(PerformActionVariables actionEvent)
-    {
-        base.PerformAction(actionEvent);
-        switch (actionEvent.tag)
-        {
-            case "Mob":
-                Mob m = actionEvent.entity as Mob;
-                AddWorker(actionEvent.entity as Mob);
-
-                switch (m.CurrentActivity)
-                {
-                    case ActivityState.Supplying:
-                        Resource.AddResource(ResourceType.Wood, m.Resource.RemoveResource(ResourceType.Wood, 10));
-                        if (Resource.CurrentWeight > Resource.maxWeight)
-                        {
-                            m.CurrentActivity = ActivityState.None;
-                        }
-                        if (m.Resource.CurrentResources[ResourceType.Wood] == 0)
-                        {
-                            m.CurrentActivity = ActivityState.None;
-                        }
-                        break;
-                    case ActivityState.Retrieving:
-                        // Give Resource
-                        m.Resource.AddResource(ResourceType.Wood, Resource.RemoveResource(ResourceType.Wood, 10));
-                        break;
-                }
-                break;
-        }
     }
 
     protected override void Tick()
@@ -61,7 +28,11 @@ public class SimpleGenericJobBuilding : JobBuilding
         base.Tick();
 
         if (_currentRequest == null)
-            _currentRequest = CityManager.TakeResourceOrderRequest();
+        {
+            _currentRequest = CityManager.TakeResourceRequest(this);
+            if (_currentRequest != null)
+                _currentRequest.ResourceRequestFilled += DeliveryRequestFilled;
+        }
 
         if (Workers.Count > 0)
             lumberWorker = Workers[0];
@@ -83,54 +54,53 @@ public class SimpleGenericJobBuilding : JobBuilding
 
     void DeliveryTask(Mob mob)
     {
-        Debug.Log(mob.CurrentActivity);
-        if (mob.CurrentActivity == ActivityState.None)
+        switch (mob.CurrentActivity)
         {
-            // Check if this mob has all the required resources for the construction task
-            if (_currentRequest.HasValue)
-            {
-                // If we don't have any resources 
-                if (mob.Resource.CurrentResources[_currentRequest.Value.type] != _currentRequest.Value.amount && mob.Resource.CurrentResources[_currentRequest.Value.type] < _currentRequest.Value.amount)
+            case ActivityState.None:
+                // Check if this mob has all the required resources for the construction task
+                if (_currentRequest != null && _currentRequest.HasNext())
                 {
-                    // Get resource from storage house
-                    mob.PerformActionVariables = new PerformActionVariables(mob, _currentRequest.Value.type, Mathf.Abs(mob.Resource.CurrentResources[_currentRequest.Value.type] - _currentRequest.Value.amount));
-                    mob.CurrentActivity = ActivityState.Retrieving;
-                    mob.SetEntityAndFollow(CityManager.FindStorageBuildings()[0]);
+                    // If we don't have any resources 
+                    if (mob.Resource.GetMaxRemainder(_currentRequest.NextRequest.ResourceType) != 0 && mob.Resource.CurrentResources[_currentRequest.NextRequest.ResourceType] != _currentRequest.NextRequest.Amount && mob.Resource.CurrentResources[_currentRequest.NextRequest.ResourceType] < _currentRequest.NextRequest.Amount)
+                    {
+                        // Get resource from storage house
+                        // Try to retrieve the number of required resources from the storehouse. If this number can't be satisfied
+                        // It will just fill the units Resource container with the maximum amount.
+                        mob.PerformActionVariables = new PerformActionVariables(mob, _currentRequest.NextRequest.ResourceType, Mathf.Abs(mob.Resource.CurrentResources[_currentRequest.NextRequest.ResourceType] - _currentRequest.NextRequest.Amount));
+                        mob.CurrentActivity = ActivityState.Retrieving;
+                        mob.SetEntityAndFollow(CityManager.StorageBuildings[0]);
+                    }
+                    //If we have enough resources, deliver
+                    else
+                    {
+                        mob.CurrentActivity = ActivityState.Supplying;
+                        mob.PerformActionVariables = new PerformActionVariables(mob, _currentRequest.NextRequest.ResourceType, _currentRequest.NextRequest.Amount);
+                        mob.SetEntityAndFollow(_currentRequest.Building);
+                    }
                 }
-                else if (mob.Resource.CurrentResources[_currentRequest.Value.type] == _currentRequest.Value.amount)
-                {
-                    mob.CurrentActivity = ActivityState.Supplying;
-                }
-            }
+                break;
+            case ActivityState.Supplying:
+   
+                break;
         }
+    }
+
+    void DeliveryRequestFilled()
+    {
+        deliveryWorker.CurrentActivity = ActivityState.None;
+        _currentRequest.ResourceRequestFilled -= DeliveryRequestFilled;
+        _currentRequest = null;
+        ForceTick();
     }
 
     void BuildTask(Mob mob)
     {
         foreach (BuildingConstructor bc in blueprints)
         {
-            if (!bc.HasBeenSupplied)
-            {
-                if (1 == 1)
-                    return;
-                if (mob.Resource.CurrentResources[ResourceType.Wood] == 0 && mob.ActionEntity != this)
-                {
-                    // Need wood, get wood
-                    mob.CurrentActivity = ActivityState.Retrieving;
-                    mob.PerformActionVariables = new PerformActionVariables(mob, ResourceType.Wood, 10);
-                    mob.SetEntityAndFollow(CityManager.FindStorageBuildings()[0]);
-                }
-                else if (mob.Resource.CurrentResources[ResourceType.Wood] >= 1)
-                {
-                    // We have enough, supply
-                    mob.CurrentActivity = ActivityState.Supplying;
-                    mob.SetEntityAndFollow(bc);
-                }
-                break;
-            }
-            else
+            if (bc.HasBeenSupplied && mob.CurrentActivity != ActivityState.Building)
             {
                 mob.CurrentActivity = ActivityState.Building;
+                mob.PerformActionVariables = new PerformActionVariables(mob);
                 mob.SetEntityAndFollow(bc);
                 break;
             }
@@ -152,12 +122,12 @@ public class SimpleGenericJobBuilding : JobBuilding
                 mob.PerformAction(new PerformActionVariables(cl[UnityEngine.Random.Range(0, cl.Count)].GetComponent<WorldResource>()));
         }
 
-        if (mob.Resource.CurrentResources[ResourceType.Wood] >= 10 && mob.CurrentActivity != ActivityState.Supplying)
+        if (mob.Resource.GetMaxRemainder(ResourceType.Wood) == 0 && mob.CurrentActivity != ActivityState.Supplying)
         {
             // We have enough resources, time to supply
             mob.CurrentActivity = ActivityState.Supplying;
             mob.PerformActionVariables = new PerformActionVariables(mob, ResourceType.Wood, 10);
-            mob.SetEntityAndFollow(CityManager.FindStorageBuildings()[0]);
+            mob.SetEntityAndFollow(CityManager.StorageBuildings[0]);
         }
     }
 

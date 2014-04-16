@@ -8,7 +8,7 @@ public class StorageBuilding : Building
     public ResourceType[] acceptedResources;
     private List<ResourceType> _acceptedResources;
 
-    protected override void Start()
+    public override void Start()
     {
         base.Start();
         Resource.AddResource(ResourceType.Meat, 50);
@@ -43,8 +43,8 @@ public class StorageBuilding : Building
                     break;
                 case ActivityState.Retrieving:
                     m.Resource.TransferResources(Resource, actionEvent.resourceTypesArgs[0], actionEvent.intArgs[0]);
+                    Debug.Log("M has: " + m.Resource[ResourceType.Wood]);
                     m.CurrentActivity = ActivityState.None;
-                    Debug.Log("setting none");
                     break;
             }
         }

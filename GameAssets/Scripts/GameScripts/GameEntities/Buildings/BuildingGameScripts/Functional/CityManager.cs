@@ -22,6 +22,7 @@ public class CityManager : Building
     private Transform _spawnPoint;
     private List<Building> _buildings;
     private List<Mob> _citizens;
+    private List<BuildingResourceRequestManager> _activeRequests;
     /// <summary>
     /// Cached list of all the citizens that are currently unemployed.
     /// </summary>
@@ -30,7 +31,6 @@ public class CityManager : Building
     /// List of houses
     /// </summary>
     private List<House> _houses;
-    private Queue<ResourceOrderRequest> _resourceOrderRequests;
 
     public ParticleSystem[] spawnParticles;
 
@@ -45,10 +45,35 @@ public class CityManager : Building
     {
         get { return _citizens; }
     }
+    public List<StorageBuilding> StorageBuildings
+    {
+        get
+        {
+            List<StorageBuilding> buildings = new List<StorageBuilding>();
+            foreach (StorageBuilding b in _buildings.FindAll(m => m is StorageBuilding))
+            {
+                buildings.Add(b);
+            }
+            return buildings;
+        }
+    }
+    public List<BuildingResourceRequestManager> ActiveRequests
+    {
+        get
+        {
+            List<BuildingResourceRequestManager> _list = new List<BuildingResourceRequestManager>();
+            foreach (BuildingResourceRequestManager request in _activeRequests)
+            {
+                if (request.HasSupplyContract == null)
+                    _list.Add(request);
+            }
+            return _list;
+        }
+    }
     #endregion
 
     #region Initilization
-    protected override void Awake()
+    public override void Awake()
     {
         base.Awake();
         _unemployedCitizens = new List<Mob>();
@@ -56,16 +81,16 @@ public class CityManager : Building
         _citizens = new List<Mob>();
         _houses = new List<House>();
         _spawnPoint = transform.FindChild("_SpawnPoint");
-        _resourceOrderRequests = new Queue<ResourceOrderRequest>();
     }
 
-    protected override void Start()
+    public override void Start()
     {
         // Initialize resource object with all the ResourceType values starting with an amount of 0
         foreach (ResourceType t in System.Enum.GetValues(typeof(ResourceType)))
         {
             _cachedResourceNumbers.Add(t, 0);
         }
+        _activeRequests = new List<BuildingResourceRequestManager>();
         base.Start();
     }
     #endregion
@@ -76,6 +101,27 @@ public class CityManager : Building
     #endregion
 
     #region Logic
+
+    public void AddResourceOrderRequest(BuildingResourceRequestManager request)
+    {
+        if (_activeRequests.Contains(request))
+            return;
+        _activeRequests.Add(request);
+    }
+
+    public void RemoveResourceOrderRequest(BuildingResourceRequestManager request)
+    {
+        _activeRequests.Remove(request);
+    }
+
+    public BuildingResourceRequestManager TakeResourceRequest(Building building)
+    {
+        if (ActiveRequests.Count == 0)
+            return null;
+        BuildingResourceRequestManager bm = ActiveRequests[0];
+        bm.HasSupplyContract = building;
+        return bm;
+    }
 
     public void AddBuilding(Building building)
     {
@@ -115,19 +161,6 @@ public class CityManager : Building
         return _citizens.Remove(m);
     }
 
-    public void AddResourceOrderRequest(ResourceOrderRequest request)
-    {
-        _resourceOrderRequests.Enqueue(request);
-        Debug.Log("Q: " + _resourceOrderRequests.Count);
-    }
-
-    public ResourceOrderRequest? TakeResourceOrderRequest()
-    {
-        if (_resourceOrderRequests.Count == 0)
-            return null;
-        return _resourceOrderRequests.Dequeue();
-    }
-
     private void UpdateCachedResources(ResourceType type, int amount)
     {
         _cachedResourceNumbers[type] = amount;
@@ -150,31 +183,5 @@ public class CityManager : Building
         }
     }
 
-    public List<StorageBuilding> FindStorageBuildings()
-    {
-        List<StorageBuilding> buildings = new List<StorageBuilding>();
-        foreach (StorageBuilding b in _buildings.FindAll(m => m is StorageBuilding))
-        {
-            buildings.Add(b);
-        }
-        return buildings;
-    }
 
-}
-
-
-public struct ResourceOrderRequest
-{
-    public Building building;
-    public Building hasContract;
-    public ResourceType type;
-    public int amount;
-
-    public ResourceOrderRequest(Building building, ResourceType type, int amount)
-    {
-        this.building = building;
-        this.type = type;
-        this.amount = amount;
-        this.hasContract = null;
-    }
 }

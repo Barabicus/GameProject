@@ -7,8 +7,9 @@ public class Resource : MonoBehaviour
 {
 
     #region Events
-    public delegate void ResourceChangedDelegate(ResourceType type, int currentAmount);
-    public event ResourceChangedDelegate ResourceChanged;
+    public delegate void ResourceDelegate(ResourceType type, int currentAmount);
+    public event ResourceDelegate ResourceChanged;
+    public event ResourceDelegate ResourceAdded;
     #endregion
 
     #region Fields
@@ -35,6 +36,9 @@ public class Resource : MonoBehaviour
     #endregion
 
     #region Properties
+    public int this[ResourceType rt]{
+        get { return _currentResources[rt]; }
+    }
     public int CurrentWeight
     {
         get { return _currentWeight; }
@@ -77,25 +81,25 @@ public class Resource : MonoBehaviour
     /// <returns></returns>
     public int AddResource(ResourceType type, int amount)
     {
-        // Calculate how many of this resource we are adding by getting the weight
-        // Add to the current weight the amount of all the items being stored
+        int initalAmount = amount;
+        // Get how much weight we can use to store items
+        int difference = maxWeight - CurrentWeight;
+        difference = difference / (ResourceWeight[type]);
+        amount = amount <= difference ? amount : difference;
+        // Store the Resources
+        _currentResources[type] += amount;
+        // Increment the weight accordingly
         _currentWeight += amount * ResourceWeight[type];
-        // If the weight is in excessive, amount will be greater than 0 
-        // Else amount will be zero for all items stored
-        int leftOver = Mathf.Max(_currentWeight - maxWeight, 0);
-        // Subtract either the excess or nothing at all
-        _currentWeight -= leftOver;
 
-        //Actually store the items
-        // If Left over is equal to zero, store all items
-        // Else Divide left over by the weight and subtract from amount
-        // Only storing the items we have room for
-        _currentResources[type] += leftOver == 0 ? amount : amount - (leftOver / ResourceWeight[type]);
+        //Fire how many items were added event
+        if (ResourceAdded != null)
+            ResourceAdded(type, amount);
 
         // Fire Changed event to notify of resource change and it's new current amount within this Resource object
         if (ResourceChanged != null)
             ResourceChanged(type, _currentResources[type]);
-        return leftOver / ResourceWeight[type];
+
+        return initalAmount - amount;
     }
 
     /// <summary>
@@ -119,23 +123,34 @@ public class Resource : MonoBehaviour
     }
 
     /// <summary>
-    /// Transfers resources from the other container into this container
+    /// Transfers resources from the other container into this container. Returns the left over amount.
     /// </summary>
     /// <param name="otherContainer"></param>
     /// <param name="type"></param>
     /// <param name="amount"></param>
     public int TransferResources(Resource otherContainer, ResourceType type, int amount)
     {
+        amount = amount > GetMaxRemainder(type) ? GetMaxRemainder(type) : amount;
         return AddResource(type, otherContainer.RemoveResource(type, amount));
     }
 
+    /// <summary>
+    /// Returns the max number of units of the specified resource type that can be stored with the given weight
+    /// </summary>
+    /// <param name="type"></param>
+    /// <returns></returns>
+    public int GetMaxRemainder(ResourceType type)
+    {
+        return (maxWeight - _currentWeight) / ResourceWeight[type];
+    }
 
     public override string ToString()
     {
         StringBuilder b = new StringBuilder();
+        b.AppendLine("CurrentWeight: " + CurrentWeight + " Maximum Weight: " + maxWeight);
         foreach (KeyValuePair<ResourceType, int> kvp in _currentResources)
         {
-            b.AppendLine(kvp.Key + " : " + kvp.Value);
+            b.AppendLine(kvp.Key + " : " + kvp.Value + " (" + ResourceWeight[kvp.Key] * kvp.Value + ")");
         }
         return b.ToString();
     }

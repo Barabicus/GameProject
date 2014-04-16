@@ -196,6 +196,7 @@ public class Mob : ActiveEntity
                 case ActivityState.None:
                     // Reset values
                     ActionEntity = null;
+                    AIPath.target = null;
                     Animator.SetBool("weaponDrawn", false);
                     break;
             }
@@ -266,7 +267,7 @@ public class Mob : ActiveEntity
 
     #region UnityMethodCalls
 
-    protected override void Awake()
+    public override void Awake()
     {
         base.Awake();
         skills = new MobSkills(0.5f, 3f, 1, 5f, 0.5f, 1, 0.5f);
@@ -276,7 +277,7 @@ public class Mob : ActiveEntity
         Physics.IgnoreLayerCollision(11, 11);
     }
 
-    protected override void Start()
+    public override void Start()
     {
         base.Start();
         SelectableList.AddSelectableEntity(this);
@@ -383,7 +384,7 @@ public class Mob : ActiveEntity
     protected virtual void LivingUpdate()
     {
         _attackTime = Math.Max(_attackTime - Time.deltaTime, 0);
-        if (ActionEntity == null)
+        if (ActionEntity == null && CurrentActivity != ActivityState.None)
         {
             CurrentActivity = ActivityState.None;
             Debug.LogWarning("Action Entity was null, resetting CurrentActivity");

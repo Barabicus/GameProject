@@ -13,7 +13,7 @@ public abstract class JobBuilding : Building {
     }
 
 
-    protected override void Awake()
+    public override void Awake()
     {
         base.Awake();
         _workers = new List<Mob>();

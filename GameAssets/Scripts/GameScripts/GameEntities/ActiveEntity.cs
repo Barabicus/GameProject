@@ -48,11 +48,11 @@ public abstract class ActiveEntity : GameEntity, IDamageable, IFactionFlag
     }
     #endregion
 
-    protected virtual void Start()
+    public virtual void Start()
     {
     }
 
-    protected virtual void Awake()
+    public virtual void Awake()
     {
         gameObject.AddComponent<HighlightableObject>();
         _ho = gameObject.GetComponent<HighlightableObject>();
@@ -83,7 +83,9 @@ public abstract class ActiveEntity : GameEntity, IDamageable, IFactionFlag
     /// the stack when exiting the scope of the method call which has the added benefit of saving the initilization of
     /// otherwise useless objects on the heap.
     /// </summary>
-    public virtual void PerformAction(PerformActionVariables actionVariables) { }
+    public virtual void PerformAction(PerformActionVariables actionVariables)
+    {
+    }
 
 
 }
@@ -119,14 +121,14 @@ public struct PerformActionVariables
         this.intArgs = new int[0];
         this.stringArgs = new string[0];
         this.vector3Args = new Vector3[0];
-        this.resourceTypesArgs = new ResourceType[]{resourceTypeArgs};
+        this.resourceTypesArgs = new ResourceType[] { resourceTypeArgs };
     }
     public PerformActionVariables(ActiveEntity entity, ResourceType resourceTypeArgs, int intArgs)
     {
         this.entity = entity;
         this.tag = entity.tag;
         this.floatArgs = new float[0];
-        this.intArgs = new int[]{intArgs};
+        this.intArgs = new int[] { intArgs };
         this.stringArgs = new string[0];
         this.vector3Args = new Vector3[0];
         this.resourceTypesArgs = new ResourceType[] { resourceTypeArgs };

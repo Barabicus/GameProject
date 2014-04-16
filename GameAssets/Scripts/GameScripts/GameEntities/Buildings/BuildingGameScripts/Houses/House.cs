@@ -30,7 +30,7 @@ public class House : Building
     }
     #endregion
 
-    protected override void Start()
+    public override void Start()
     {
         base.Start();
         _currentResidents = new List<Mob>();

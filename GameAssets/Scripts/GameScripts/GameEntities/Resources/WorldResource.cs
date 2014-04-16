@@ -43,14 +43,15 @@ public class WorldResource : ActiveEntity
     #endregion
 
 
-    protected override void Awake()
+    public override void Awake()
     {
         base.Awake();
         animator = GetComponent<Animator>();
     }
 
     // Use this for initialization
-	protected override void Start () {
+    public override void Start()
+    {
         base.Start();
 	}
 	
