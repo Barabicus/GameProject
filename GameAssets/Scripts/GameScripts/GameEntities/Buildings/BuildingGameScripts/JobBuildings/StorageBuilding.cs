@@ -43,7 +43,6 @@ public class StorageBuilding : Building
                     break;
                 case ActivityState.Retrieving:
                     m.Resource.TransferResources(Resource, actionEvent.resourceTypesArgs[0], actionEvent.intArgs[0]);
-                    Debug.Log("M has: " + m.Resource[ResourceType.Wood]);
                     m.CurrentActivity = ActivityState.None;
                     break;
             }

@@ -52,7 +52,7 @@ public class Mob : ActiveEntity
     /// <summary>
     /// What this mob is currently doing. Eg idle, moving, attacking etc
     /// </summary>
-    private ActivityState _activityState = ActivityState.None;
+    public ActivityState _activityState = ActivityState.None;
     /// <summary>
     /// The resources this mob is currently holding
     /// </summary>
@@ -410,7 +410,7 @@ public class Mob : ActiveEntity
                 case ActivityState.Woodcutting:
                     if (distanceToTarget() < 10f)
                     {
-                        TryPerformAction(new PerformActionVariables(this, tag), ActionEntity);
+                        TryPerformAction(PerformActionVariables, ActionEntity);
                         Animator.SetTrigger("chopWood");
                     }
                     break;

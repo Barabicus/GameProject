@@ -28,7 +28,7 @@ internal class ResourceUnitTests : UnityUnitTest
         r.AddResource(ResourceType.Meat, 1);
         r.AddResource(ResourceType.Stone, 1);
         r.AddResource(ResourceType.Wood, 1);
-        Assert.That(r.CurrentWeight == 8);
+        Assert.That(r.CurrentWeight == 8, "Message");
     }
 
     [Test]

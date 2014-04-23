@@ -100,10 +100,10 @@ public class Building : ActiveEntity
     public override void Start()
     {
         base.Start();
-        if (HUDRoot.go != null && controlPrefab != null)
+        if (HUDRoot.go != null)
         {
-            _controlInstance = NGUITools.AddChild(HUDRoot.go, controlPrefab.gameObject).GetComponent<BuildingControl>();
-            _controlInstance.ParentObject = this.gameObject;
+            _controlInstance = NGUITools.AddChild(HUDRoot.go, BuildingGUIProperties.Instance.BasePrefab).GetComponent<BuildingControl>();
+            _controlInstance.ParentObject = this;
             // Make the UI follow the target
             if (transform.FindChild("_pivot") == null)
             {
@@ -183,22 +183,27 @@ public class Building : ActiveEntity
                 switch (m.CurrentActivity)
                 {
                     case ActivityState.Supplying:
-                        bool isMobResourceEmpty = true;
-                        foreach (ResourceType rt in actionVariables.resourceTypesArgs)
-                        {
-                            if (m.Resource.CurrentResources[rt] > 0)
-                            {
-                                Resource.TransferResources(m.Resource, rt, 1);
-                                isMobResourceEmpty = false;
-                                break;
-                            }
-                        }
-                        if (isMobResourceEmpty)
-                            m.CurrentActivity = ActivityState.None;
+                        Supply(m, actionVariables);
                         break;
                 }
                 break;
         }
+    }
+
+    protected virtual void Supply(Mob mob, PerformActionVariables actionVariables)
+    {
+        bool isMobResourceEmpty = true;
+        foreach (ResourceType rt in actionVariables.resourceTypesArgs)
+        {
+            if (mob.Resource.CurrentResources[rt] > 0)
+            {
+                Resource.TransferResources(mob.Resource, rt, actionVariables.intArgs[0]);
+                isMobResourceEmpty = false;
+                break;
+            }
+        }
+        if (isMobResourceEmpty)
+            mob.CurrentActivity = ActivityState.None;
     }
 
     /// <summary>
@@ -227,6 +232,38 @@ public class Building : ActiveEntity
     }
 
     #endregion
+
+    #region Static Mob State Method
+
+    /// <summary>
+    ///  A supply state helper method to transfer resources from the mob to the specified building. 
+    /// </summary>
+    /// <param name="building"></param>
+    /// <param name="mob"></param>
+    /// <param name="actionVariables"></param>
+    public static void MobSupplyAndTransfer(Building building, Mob mob, PerformActionVariables actionVariables)
+    {
+        if (mob.CurrentActivity != ActivityState.Supplying)
+        {
+            Debug.LogError("Mob State should be supplying");
+            return;
+        }
+        bool isMobResourceEmpty = true;
+        foreach (ResourceType rt in actionVariables.resourceTypesArgs)
+        {
+            if (mob.Resource.CurrentResources[rt] > 0)
+            {
+                building.Resource.TransferResources(mob.Resource, rt, actionVariables.intArgs[0]);
+                isMobResourceEmpty = false;
+                break;
+            }
+        }
+        if (isMobResourceEmpty)
+            mob.CurrentActivity = ActivityState.None;
+    }
+
+    #endregion
+
 }
 
 public class BuildingResourceRequestManager

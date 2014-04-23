@@ -7,6 +7,7 @@ public class House : Building
 {
 
     public int maxResidents;
+    public Transform spawnPoint;
 
     public Mob[] tempResidents;
 
@@ -77,5 +78,9 @@ public class House : Building
     protected override void Tick()
     {
         base.Tick();
+        if (HasRoom)
+        {
+            AddResident(PlayerManager.Instance.SpawnMonster(1, spawnPoint));
+        }
     }
 }

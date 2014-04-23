@@ -121,27 +121,21 @@ public class BuildingConstructor : Building
                     case ActivityState.Building:
                         Construct(mob.Skills.buildPower);
                         break;
-                    case ActivityState.Supplying:
-                        SupplyResources(mob.Resource, actionEvent);
-                        mob.CurrentActivity = ActivityState.None;
-                        break;
                 }
                 break;
         }
     }
 
-    public void SupplyResources(Resource resource, PerformActionVariables actionEvent)
+    protected override void Supply(Mob mob, PerformActionVariables actionVariables)
+    {
+        base.Supply(mob, actionVariables);
+        SupplyResources(mob.Resource, actionVariables);
+    }
+
+    void SupplyResources(Resource resource, PerformActionVariables actionVariables)
     {
         if (_resourceRequirementMet)
             return;
-        // Remove all resources from this container that this building constructor needs to advance.
-        for (int i = 0; i < requiredResources.Length; i++)
-        {
-            // Get how many resources is required left
-            int transfer = (requiredResourceAmount[i] - Resource[requiredResources[i]]);
-            transfer = actionEvent.intArgs[0] > transfer ? Mathf.Abs(actionEvent.intArgs[0] - transfer) : transfer;
-        }
-
         // Perform check to see if we have all the required resources
         _resourceRequirementMet = true;
         for (int i = 0; i < requiredResources.Length; i++)
@@ -149,7 +143,6 @@ public class BuildingConstructor : Building
             if (Resource[requiredResources[i]] != requiredResourceAmount[i])
             {
                 _resourceRequirementMet = false;
-                return;
             }
         }
     }

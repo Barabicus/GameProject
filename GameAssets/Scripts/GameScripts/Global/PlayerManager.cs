@@ -54,17 +54,18 @@ public class PlayerManager : MonoBehaviour
     /// </summary>
     /// <param name="id"></param>
     /// <returns>Returns a mob is a monster was spawned or null if a mob was not spawned</returns>
-    public Mob SpawnMonster(int id, Transform spawnPoint, ParticleSystem[] spawnParticles)
+    public Mob SpawnMonster(int id, Transform spawnPoint)
     {
         // Don't spawn if our population is too great
         if (_currentPopulation >= maxPopulation)
             return null;
         _currentPopulation++;
         Mob m = Instantiate(MonsterList.Instance.Monsters[id], spawnPoint.position, spawnPoint.rotation) as Mob;
-        foreach (ParticleSystem ps in spawnParticles)
+      /*  foreach (ParticleSystem ps in spawnParticles)
         {
             Instantiate(ps, spawnPoint.position, Quaternion.Euler(new Vector3(90, 0, 0)));
         }
+       */
         return m;
     }
 	

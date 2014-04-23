@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
+// TODO move this logic to the city manager
 public class BlueprintList : MonoBehaviour {
 
     private static BlueprintList _instance;

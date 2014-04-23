@@ -170,17 +170,6 @@ public class CityManager : Building
     protected override void Tick()
     {
         base.Tick();
-        if (PlayerManager.Instance.HasPopulationSpace)
-        {
-            foreach (House h in _buildings.FindAll(m => m is House))
-            {
-                if (h.HasRoom)
-                {
-                    h.AddResident(PlayerManager.Instance.SpawnMonster(1, _spawnPoint, spawnParticles));
-                    break;
-                }
-            }
-        }
     }
 
 

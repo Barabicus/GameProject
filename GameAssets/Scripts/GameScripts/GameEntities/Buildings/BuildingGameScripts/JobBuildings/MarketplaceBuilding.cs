@@ -9,12 +9,10 @@ public class MarketplaceBuilding : JobBuilding {
     public override void Start()
     {
         base.Start();
-        BuildingResourceRequestManager.AddRequest(ResourceType.Meat, 10);
     }
 
     protected override void Tick()
     {
-        Debug.Log("MEAT: " + Resource[ResourceType.Meat]);
         base.Tick();
     }
 
