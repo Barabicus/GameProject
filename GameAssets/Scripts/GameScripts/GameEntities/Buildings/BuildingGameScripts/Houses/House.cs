@@ -15,7 +15,7 @@ public class House : Building
 
     #region Properties
     /// <summary>
-    /// Returns a cloned list of the current residents of this house. 
+    /// Returns a readonly list of the current residents of this house. 
     /// </summary>
     public ReadOnlyCollection<Mob> CurrentResidents
     {

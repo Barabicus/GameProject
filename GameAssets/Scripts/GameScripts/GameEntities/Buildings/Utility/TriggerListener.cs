@@ -2,13 +2,10 @@
 using System.Collections;
 
 public class TriggerListener : MonoBehaviour {
-    void OnTriggerEnter(Collider other)
-    {
-        StateController.Instance.GetController<BuildingPlaceController>().OtherTriggerEnter(other);
-    }
 
-    void OnTriggerExit(Collider other)
+    IEnumerator OnTriggerStay(Collider other)
     {
-        StateController.Instance.GetController<BuildingPlaceController>().OtherTriggerExit(other);
+        StateController.Instance.GetController<BuildingPlaceController>().TriggerStay(other);
+        yield return new WaitForEndOfFrame();
     }
 }

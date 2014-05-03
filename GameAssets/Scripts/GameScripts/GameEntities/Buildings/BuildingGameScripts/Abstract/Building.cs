@@ -14,7 +14,9 @@ public class Building : ActiveEntity
     public float tickFrequency = 5;
     public BuildingCategory buildingCategory;
     public bool isInvincible = false;
+    [HideInInspector]
     public BuildingControl controlPrefab;
+    public List<BuildingControl.ControlType> ControlComponents;
 
     protected int currentHP;
     public BuildState buildState = BuildState.Constructed;
@@ -104,12 +106,16 @@ public class Building : ActiveEntity
         {
             _controlInstance = NGUITools.AddChild(HUDRoot.go, BuildingGUIProperties.Instance.BasePrefab).GetComponent<BuildingControl>();
             _controlInstance.ParentObject = this;
+            foreach (BuildingControl.ControlType c in ControlComponents)
+            {
+                _controlInstance.AddTab(c);
+            }
             // Make the UI follow the target
             if (transform.FindChild("_pivot") == null)
             {
                 GameObject go = new GameObject("_pivot");
                 go.transform.parent = transform;
-                go.transform.localPosition = Vector3.zero;
+                go.transform.localPosition = new Vector3(0, 15, 0);
             }
             _controlInstance.gameObject.AddComponent<UIFollowTarget>().target = transform.FindChild("_pivot");
             _controlInstance.gameObject.SetActive(false);

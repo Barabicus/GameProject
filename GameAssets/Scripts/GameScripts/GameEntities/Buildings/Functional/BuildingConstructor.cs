@@ -132,6 +132,11 @@ public class BuildingConstructor : Building
         SupplyResources(mob.Resource, actionVariables);
     }
 
+    /// <summary>
+    /// Check to ensure that resource requirement is met
+    /// </summary>
+    /// <param name="resource"></param>
+    /// <param name="actionVariables"></param>
     void SupplyResources(Resource resource, PerformActionVariables actionVariables)
     {
         if (_resourceRequirementMet)

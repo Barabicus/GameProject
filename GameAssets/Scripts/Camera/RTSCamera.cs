@@ -19,7 +19,6 @@ public class RTSCamera : MonoBehaviour
     public float lowTilt = 15f;
     public float highTilt = 60f;
     public float maxHeight = 125f;
-    public float UnitViewHeightAddition = 10f;
     public float minimumY = -40F;
     public float maximumY = 80F;
     public CameraState _state = CameraState.WorldView;
@@ -43,8 +42,6 @@ public class RTSCamera : MonoBehaviour
         set
         {
             _state = value;
-            if (value == CameraState.UnitView)
-                transform.rotation = Quaternion.Euler(90, 0, 0);
         }
     }
 
@@ -53,8 +50,7 @@ public class RTSCamera : MonoBehaviour
     #region State
     public enum CameraState
     {
-        WorldView,
-        UnitView,
+        WorldView
     }
 
     public enum RotateState
@@ -103,25 +99,7 @@ public class RTSCamera : MonoBehaviour
             case CameraState.WorldView:
                 PerformWorldView();
                 break;
-            case CameraState.UnitView:
-                PerformUnitView();
-                break;
         }
-    }
-
-    void PerformUnitView()
-    {
-        RaycastHit hit;
-        if (Physics.Raycast(new Ray(new Vector3(transform.position.x, 1000, transform.position.z), -Vector3.up), out hit, Mathf.Infinity, 1 << 9))
-        {
-            newHeight = hit.point.y + UnitViewHeightAddition;
-        }
-
-        transform.position += new Vector3(transform.right.x, 0, transform.right.z) * Input.GetAxis("Horizontal") * speed * Time.deltaTime;
-        transform.position += Quaternion.Euler(0, transform.localEulerAngles.y, transform.localEulerAngles.z) * Vector3.forward * Input.GetAxis("Vertical") * speed * Time.deltaTime;
-        transform.position = Vector3.Lerp(transform.position, new Vector3(transform.position.x, newHeight, transform.position.z), Time.deltaTime * zoomLerpSpeed);
-        transform.Rotate(Vector3.up, Input.GetAxis("Rotate") * rotateSpeed * Time.deltaTime, Space.World);
-
     }
 
     void PerformWorldView()
@@ -152,28 +130,15 @@ public class RTSCamera : MonoBehaviour
                 break;
         }
 
-        /*
-        if (!Input.GetMouseButton(2))
-        {
-            newHeight = Mathf.Min(newHeight + (zoomAmount * zoomSpeed) * 2, maxHeight);
-            transform.Rotate(Vector3.up, Input.GetAxis("Rotate") * rotateSpeed * Time.deltaTime, Space.World);
-        }
-        else
-        {
-            newHeight = Mathf.Min(newHeight + Input.GetAxis("Mouse Y") * zoomSpeed, maxHeight);
-            transform.Rotate(Vector3.up, Input.GetAxis("Mouse X") * rotateSpeed * Time.deltaTime, Space.World);
-        }
-        */
-
         RaycastHit hit;
         Physics.Raycast(new Vector3(transform.position.x, 1000, transform.position.z), -Vector3.up, out hit, Mathf.Infinity, 1 << 9);
 
         newHeight = Mathf.Max(Mathf.Min(newHeight + (zoomAmount * zoomSpeed) * 2, maxHeight), hit.point.y + minHeightDistance);
-        transform.Rotate(Vector3.up, Input.GetAxis("Rotate") * rotateSpeed * Time.deltaTime, Space.World);
+        transform.Rotate(Vector3.up, Input.GetAxis("Rotate") * rotateSpeed * (Time.deltaTime / Time.timeScale), Space.World);
 
-        transform.position += new Vector3(transform.right.x, 0, transform.right.z) * Input.GetAxis("Horizontal") * speed * Time.deltaTime;
-        transform.position += Quaternion.Euler(0, transform.localEulerAngles.y, transform.localEulerAngles.z) * Vector3.forward * Input.GetAxis("Vertical") * speed * Time.deltaTime;
-        transform.position = Vector3.Lerp(transform.position, new Vector3(transform.position.x, newHeight, transform.position.z), Time.deltaTime * zoomLerpSpeed);
+        transform.position += new Vector3(transform.right.x, 0, transform.right.z) * Input.GetAxis("Horizontal") * speed * (Time.deltaTime / Time.timeScale);
+        transform.position += Quaternion.Euler(0, transform.localEulerAngles.y, transform.localEulerAngles.z) * Vector3.forward * Input.GetAxis("Vertical") * speed * (Time.deltaTime / Time.timeScale);
+        transform.position = Vector3.Lerp(transform.position, new Vector3(transform.position.x, newHeight, transform.position.z), (Time.deltaTime / Time.timeScale) * zoomLerpSpeed);
     }
 
     void OnGUI()

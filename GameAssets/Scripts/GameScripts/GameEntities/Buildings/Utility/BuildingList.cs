@@ -199,7 +199,7 @@ public class BuildingList : MonoBehaviour
                 obj.tag = "Preview";
                 break;
         }
-        obj.layer = 11;
+        obj.layer = 10;
         obj.transform.position = blueprint.transform.position;
         obj.transform.rotation = blueprint.transform.rotation;
         obj.transform.localScale = blueprint.transform.localScale;

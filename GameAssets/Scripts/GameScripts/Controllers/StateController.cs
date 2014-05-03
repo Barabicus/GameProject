@@ -47,7 +47,7 @@ public class StateController : MonoBehaviour
                     controllers[typeof(BuildingPlaceController).GetHashCode()].enabled = true;
                     break;
                 case ControllerState.Selection:
-                    controllers[typeof(SelectController).GetHashCode()].enabled = false;
+                    controllers[typeof(SelectController).GetHashCode()].enabled = false; // Disabled
                     break;
             }
             // Set the state

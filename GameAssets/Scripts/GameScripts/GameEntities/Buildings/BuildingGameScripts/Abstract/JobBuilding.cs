@@ -70,6 +70,7 @@ public abstract class JobBuilding : Building {
 
     #region Generic Static Job Methods
 
+
     public static void LumberTask(Building building, Mob mob)
     {
         if (mob.CurrentActivity == ActivityState.None)

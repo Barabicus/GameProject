@@ -21,7 +21,7 @@ public class BuildingPlaceController : Controller
     private Transform _buildingPreview;
     private Vector3 _placePosition = Vector3.zero;
     private PlaceType _placeType = PlaceType.Single;
-    private int _colliders = 0;
+    private bool _canPlace = false;
     /// <summary>
     /// Reference to the material color changer that will be used to change the color of all objects 
     /// associated with the preview building.
@@ -49,7 +49,7 @@ public class BuildingPlaceController : Controller
         get { return _buildingPreview; }
         set
         {
-            _colliders = 0;
+            _canPlace = false;
             _buildingPreview.gameObject.SetActive(false);
             _buildingPreview.transform.rotation = Quaternion.identity;
             _buildingPreview.position = Vector3.zero;
@@ -76,8 +76,7 @@ public class BuildingPlaceController : Controller
     public override void Awake () {
         base.Awake();
         _selectedBlueprint = BuildingList.Instance.BuildingBlueprintPrefabs[0];
-        _buildingPreview = BuildingList.Instance.BuildingPreviewPrefabs[0];
-        
+        _buildingPreview = BuildingList.Instance.BuildingPreviewPrefabs[0];        
 	}
 
     public void OnDisable()
@@ -86,16 +85,10 @@ public class BuildingPlaceController : Controller
     }
 
 
-    public void OtherTriggerEnter(Collider other)
+    public void TriggerStay(Collider other)
     {
         if (!other.tag.Equals("Ground"))
-            _colliders++;
-    }
-
-    public void OtherTriggerExit(Collider other)
-    {
-        if (!other.tag.Equals("Ground"))
-            _colliders--;
+            _canPlace = false;
     }
 	
 	void Update () {
@@ -106,14 +99,11 @@ public class BuildingPlaceController : Controller
             }
             else
             {
-                if (_colliders > 0)
-                {
-                    _matColorChanger.ChangeColor(cantPlaceColor);
-                }
-                else
-                {
+                // Check the can place Status and change the material colour accordingly
+                if (_canPlace)
                     _matColorChanger.ChangeColor(canPlaceColor);
-                }
+                else
+                    _matColorChanger.ChangeColor(cantPlaceColor);
                 RaycastHit hit;
                 // If the mouse is over the terrain
                 if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, placeDistance, 1 << 9) && hit.collider.tag.Equals("Ground"))
@@ -127,7 +117,7 @@ Mathf.Round(hit.point.z / gridSize.z) * gridSize.z);
                     {
                         BuildingPreview.Rotate(Vector3.up, 90f);
                     }
-                    if (Input.GetMouseButtonDown(0))
+                    if (Input.GetMouseButtonDown(0) && _canPlace)
                     {
                         _placePosition = new Vector3(Mathf.Round(hit.point.x / gridSize.x) * gridSize.x,
 hit.point.y,
@@ -149,23 +139,14 @@ Mathf.Round(hit.point.z / gridSize.z) * gridSize.z);
                     BuildingPreview.gameObject.SetActive(false);
                 }
             }
+        // Once everything has been moved set the placeable trigger to true
+        // A OnTriggerStay will be called on the associated BuildingPreview.
+        // If a trigger exists then this will be false in the next frame
+        // and so on until no triggers exist.
+            _canPlace = true;
     }
 
-    public IEnumerator DragPlace(Transform t)
-    {
-        Vector2 placePos = Camera.main.WorldToScreenPoint(_placePosition);
-        BoxCollider c = t.GetComponent<BoxCollider>();
-        float placeDistance = c.size.x * 2;
-        while (Input.GetMouseButton(0))
-        {
-            if (Mathf.Abs(placePos.x - Input.mousePosition.x) > placeDistance)
-            {
-                //Instantiate(BuildingPreview, newPos, _placeDisplay.rotation);
-                //yield break;
-            }
-            yield return 0;
-        }
-    }
+
 
     #endregion
 
