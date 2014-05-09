@@ -6,7 +6,7 @@ using System.Collections.Generic;
 [RequireComponent(typeof(BuildingInfo))]
 [RequireComponent(typeof(Resource))]
 [RequireComponent(typeof(DynamicGridObstacle))]
-public class Building : ActiveEntity
+public class Building : ActiveEntity, ISelectable, ICitymanager
 {
 
     #region Fields
@@ -14,15 +14,12 @@ public class Building : ActiveEntity
     public float tickFrequency = 5;
     public BuildingCategory buildingCategory;
     public bool isInvincible = false;
-    [HideInInspector]
-    public BuildingControl controlPrefab;
     public List<BuildingControl.ControlType> ControlComponents;
 
     protected int currentHP;
     public BuildState buildState = BuildState.Constructed;
 
     private BuildingControl _controlInstance;
-    private CityManager _cityManager;
     private FactionFlags _factionFlags = FactionFlags.None;
     private FactionFlags _enemyFlags = FactionFlags.None;
     private float _lastTick;
@@ -43,14 +40,14 @@ public class Building : ActiveEntity
     }
     public CityManager CityManager
     {
-        get { return _cityManager; }
-        set { _cityManager = value; }
+        get;
+        set;
     }
     protected BuildingResourceRequestManager BuildingResourceRequestManager
     {
         get { return _buildingResourceRequestManager; }
     }
-    public override FactionFlags FactionFlags
+    public FactionFlags FactionFlags
     {
         get
         {
@@ -61,7 +58,7 @@ public class Building : ActiveEntity
             _factionFlags = value;
         }
     }
-    public override FactionFlags EnemyFlags
+    public FactionFlags EnemyFlags
     {
         get
         {
@@ -230,7 +227,7 @@ public class Building : ActiveEntity
 
     void OnDestroy()
     {
-        if (controlPrefab != null)
+        if (_controlInstance != null)
         {
             BuildControlsGUIManager.Instance.CurrentControlBox = null;
             Destroy(_controlInstance);

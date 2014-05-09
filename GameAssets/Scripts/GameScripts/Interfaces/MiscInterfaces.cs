@@ -1,0 +1,42 @@
+﻿using UnityEngine;
+using System.Collections;
+
+public interface ISelectable
+{
+    bool IsSelected { get; set; }
+}
+
+public interface IResource
+{
+    Resource Resource { get; set; }
+}
+
+public interface IUnitName
+{
+    string UnitName { get; set; }
+}
+
+public interface ICitymanager
+{
+    CityManager CityManager { get; set; }
+}
+
+public interface IDamageable
+{
+    bool Damage(int damage);
+}
+
+public interface IFactionFlag
+{
+    FactionFlags FactionFlags { get; set; }
+}
+
+[System.Flags]
+public enum FactionFlags
+{
+    None = 0x0,
+    one,
+    two,
+    three,
+    four
+}

@@ -20,24 +20,4 @@ public abstract class GameEntity : MonoBehaviour
 
     }
 
-    #region Triggers
-
-    protected virtual void OnTriggerLOSEnter(TriggerData data)
-    {
-    }
-
-    protected virtual void OnTriggerLOSExit(TriggerData data)
-    {
-    }
-
-    protected virtual void OnChaseLOSEnter(TriggerData data)
-    {
-    }
-
-    protected virtual void OnChaseLOSExit(TriggerData data)
-    {
-    }
-
-    #endregion
-
 }

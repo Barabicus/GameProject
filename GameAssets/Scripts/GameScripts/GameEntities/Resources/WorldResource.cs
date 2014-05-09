@@ -6,8 +6,6 @@ public class WorldResource : ActiveEntity
 {
 
     #region Fields
-
-    public MobFlags resourceRequirement = MobFlags.None;
     public ResourceType resource;
     public bool isInfinite = false;
     public bool regenerates = false;
@@ -119,42 +117,9 @@ public class WorldResource : ActiveEntity
         Destroy(gameObject);
     }
 
-    public bool CanHarvest(MobFlags flags)
-    {
-        return (flags & resourceRequirement) == resourceRequirement;
-    }
-
-    public override FactionFlags FactionFlags
-    {
-        get
-        {
-            return FactionFlags.None;
-        }
-        set
-        {
-            
-        }
-    }
-
-    public override FactionFlags EnemyFlags
-    {
-        get
-        {
-            return global::FactionFlags.None;
-        }
-        set
-        {
-
-        }
-    }
-
-    public override bool Damage(int damage)
-    {
-        return false;
-    }
 }
 
-enum ResourceState
+public enum ResourceState
 {
     Active,
     Dying,

@@ -19,6 +19,7 @@ public class BuildingControl : MonoBehaviour
     public ControlComponent ResourceComponent;
     public ControlComponent BasicInfoComponent;
     public ControlComponent HouseComponent;
+    public ControlComponent JobBuildingComponent;
 
     #endregion
 
@@ -50,6 +51,9 @@ public class BuildingControl : MonoBehaviour
             case ControlType.House:
                 controlComp = Instantiate(HouseComponent) as ControlComponent;
                 break;
+            case ControlType.JobBuilding:
+                controlComp = Instantiate(JobBuildingComponent) as ControlComponent;
+                break;
         }
 
         controlComp.BuildingControl = this;
@@ -77,7 +81,8 @@ public class BuildingControl : MonoBehaviour
     {
         BasicInfo,
         Resource,
-        House
+        House,
+        JobBuilding
     }
 
 }

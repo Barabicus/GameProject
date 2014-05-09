@@ -15,7 +15,7 @@ public delegate void MobAction(Mob mob);
 [RequireComponent(typeof(WeaponControl))]
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(Resource))]
-public class Mob : ActiveEntity
+public class Mob : ActiveEntity, ISelectable, IResource, IUnitName
 {
 
     #region Events & Delegates
@@ -26,19 +26,10 @@ public class Mob : ActiveEntity
     #region Fields
     public int maxHp = 0;
     public int Hp = 0;
-    public GameObject prefab;
 
     private LivingState livingState = LivingState.Alive;
     protected MobSkills skills;
 
-    /// <summary>
-    /// The faction flags this mob belongs to
-    /// </summary>
-    private FactionFlags _factionFlags = FactionFlags.None;
-    /// <summary>
-    /// The flags belonging to this mob's enemies
-    /// </summary>
-    private FactionFlags _enemyFlags = FactionFlags.None;
     private AIPath _aiPath;
     /// <summary>
     /// The transform that indicates the mob is selected. This is visual. Not to be confused
@@ -70,7 +61,6 @@ public class Mob : ActiveEntity
     /// Influenced by attackSpeed mobskill.
     /// </summary>
     private float _attackTime = 0f;
-    private string _mobName = "undefined";
     private float _lastActionTime = 0.0f;
     private Transform _healthPivot;
     private House _house;
@@ -112,31 +102,19 @@ public class Mob : ActiveEntity
         get { return _cityManager; }
         set { _cityManager = value; }
     }
-    public override FactionFlags FactionFlags
+    public FactionFlags FactionFlags
     {
-        get
-        {
-            return _factionFlags;
-        }
-        set
-        {
-            _factionFlags = value;
-        }
+        get;
+        set;
     }
     public Transform HealthPivot
     {
         get { return _healthPivot; }
     }
-    public override FactionFlags EnemyFlags
+    public FactionFlags EnemyFlags
     {
-        get
-        {
-            return _enemyFlags;
-        }
-        set
-        {
-            _enemyFlags = value;
-        }
+        get;
+        set;
     }
     public House House
     {
@@ -156,19 +134,20 @@ public class Mob : ActiveEntity
         get { return _weaponcontrol; }
     }
 
+    bool _isSelected;
     /// <summary>
     /// If this mob has been selected by the unit select controller.
     /// </summary>
-    public override bool isSelected
+    public bool IsSelected
     {
         get
         {
-            return base.isSelected;
+            return _isSelected;
         }
         set
         {
-            base.isSelected = value;
-            _selectedTransform.gameObject.SetActive(isSelected);
+            _isSelected = value;
+            _selectedTransform.gameObject.SetActive(IsSelected);
         }
     }
     public MobSkills Skills
@@ -228,7 +207,7 @@ public class Mob : ActiveEntity
     /// it resets the attack timer to the attack speed of the mob and counts back down to 0
     /// allowing it to attack once again.
     /// </summary>
-    public bool CanAttack
+    private bool CanAttack
     {
         get { return _attackTime == 0; }
     }
@@ -248,7 +227,7 @@ public class Mob : ActiveEntity
                     FactionFlags = global::FactionFlags.None;
                     EnemyFlags = global::FactionFlags.None;
                     SelectableList.RemoveSelectableEntity(this);
-                    isSelected = false;
+                    IsSelected = false;
                     // Fire dead events
                     if (Killed != null)
                         Killed(this);
@@ -523,22 +502,6 @@ public class Mob : ActiveEntity
 
     #endregion
 
-    #region Triggers
-
-    protected override void OnTriggerLOSEnter(TriggerData data)
-    {
-        base.OnTriggerLOSEnter(data);
-        if (IsEnemey(data.entity.GetComponent<ActiveEntity>().FactionFlags))
-            enemies.Add(data.entity.GetComponent<ActiveEntity>());
-    }
-
-    protected override void OnChaseLOSExit(TriggerData data)
-    {
-        base.OnChaseLOSExit(data);
-        enemies.Remove(data.entity.GetComponent<ActiveEntity>());
-    }
-
-    #endregion
 
 }
 

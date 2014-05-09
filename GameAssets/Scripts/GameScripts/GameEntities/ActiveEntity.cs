@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-public abstract class ActiveEntity : GameEntity, IDamageable, IFactionFlag
+public abstract class ActiveEntity : GameEntity
 {
 
     #region Fields
@@ -13,25 +13,11 @@ public abstract class ActiveEntity : GameEntity, IDamageable, IFactionFlag
     private HighlightableObject _ho;
     public string EntityID = "MISSINGNO";
     private bool _isHightlightable = true;
-    private bool _isSelectable = true;
 
     #endregion
 
     #region Properties
-    public abstract FactionFlags FactionFlags { get; set; }
-    public abstract FactionFlags EnemyFlags { get; set; }
-    /// <summary>
-    /// Returns true if the object has been selected by the player. This is controlled via the SelectController.
-    /// </summary>
-    public virtual bool isSelected
-    {
-        get { return _isSelected; }
-        set
-        {
-            if (IsSelectable)
-                _isSelected = value;
-        }
-    }
+
     public HighlightableObject ObjectHighlight
     {
         get { return _ho; }
@@ -40,11 +26,6 @@ public abstract class ActiveEntity : GameEntity, IDamageable, IFactionFlag
     {
         get { return _isHightlightable; }
         set { _isHightlightable = value; }
-    }
-    public bool IsSelectable
-    {
-        get { return _isSelectable; }
-        set { _isSelectable = value; }
     }
     #endregion
 

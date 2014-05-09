@@ -10,11 +10,9 @@ public class HouseControlComponent : ControlComponent {
 
     private House _house;
     private List<UILabel> _tableLabels;
-    private string noMob;
 
     void Awake()
     {
-        noMob = "Null";
         _tableLabels = new List<UILabel>();
     }
     
@@ -29,7 +27,6 @@ public class HouseControlComponent : ControlComponent {
             UILabel l = Instantiate(labelPrefab) as UILabel;
             l.transform.parent = table.transform;
             l.transform.localScale = new Vector3(1, 1, 1);
-            l.text = noMob;
             _tableLabels.Add(l);
         }
         table.Reposition();
@@ -38,10 +35,10 @@ public class HouseControlComponent : ControlComponent {
     void Update()
     {
         populationLabel.text = _house.CurrentResidents.Count + " / " + _house.maxResidents;
-        for (int i = 0; i < _tableLabels.Count; i++)
-        {
-            _tableLabels[i].text = (_house.CurrentResidents.Count <= i-1 && _house.CurrentResidents[i] != null) ? _house.CurrentResidents[i].MobName : noMob;
-        }
+    //    for (int i = 0; i < _tableLabels.Count; i++)
+    //    {
+    //        _tableLabels[i].text = (_house.CurrentResidents.Count <= i-1 && _house.CurrentResidents[i] != null) ? _house.CurrentResidents[i].MobName : noMob;
+    //    }
     }
 
 }

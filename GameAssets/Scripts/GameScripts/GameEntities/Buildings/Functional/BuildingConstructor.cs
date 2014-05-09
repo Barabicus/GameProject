@@ -33,7 +33,7 @@ public class BuildingConstructor : Building
     {
         get { return _resourceRequirementMet; }
     }
-    public override FactionFlags EnemyFlags
+    public FactionFlags EnemyFlags
     {
         get
         {
@@ -44,7 +44,7 @@ public class BuildingConstructor : Building
         {
         }
     }
-    public override FactionFlags FactionFlags
+    public FactionFlags FactionFlags
     {
         get
         {
