@@ -2,17 +2,13 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.ComponentModel;
 
 public abstract class ActiveEntity : GameEntity
 {
 
     #region Fields
-
-    protected List<ActiveEntity> enemies = new List<ActiveEntity>();
-    private bool _isSelected;
     private HighlightableObject _ho;
-    public string EntityID = "MISSINGNO";
-    private bool _isHightlightable = true;
 
     #endregion
 
@@ -22,15 +18,18 @@ public abstract class ActiveEntity : GameEntity
     {
         get { return _ho; }
     }
+    [DefaultValue(true)]
     public bool IsHighlightable
     {
-        get { return _isHightlightable; }
-        set { _isHightlightable = value; }
+        get;
+        set;
     }
+
     #endregion
 
     public virtual void Start()
     {
+        IsHighlightable = true;
     }
 
     public virtual void Awake()
@@ -50,9 +49,6 @@ public abstract class ActiveEntity : GameEntity
     {
         _ho.ConstantOff();
     }
-
-    public abstract bool Damage(int damage);
-
 
     /// <summary>
     /// When called this method, using the actionEvent parameter will cause the Entity

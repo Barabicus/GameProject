@@ -82,7 +82,6 @@ public class BuildingList : MonoBehaviour
                 g.GetComponent<BuildingInfo>().CopyFromOther(buildings[i].GetComponent<BuildingInfo>());
                 g.AddComponent<BuildingConstructor>();
                 g.GetComponent<BuildingConstructor>().ConstructedPrefab = buildings[i].transform;
-                g.GetComponent<BuildingConstructor>().controlPrefab = constructionControlPrefab;
                 ConstructPreviewPrefab(buildings[i].gameObject, g, BuildingType.Blueprint);
                 g.transform.parent = transform;
                 g.SetActive(false);

@@ -7,12 +7,7 @@ public class SelectController : Controller
 {
 
     #region Fields
-    public delegate void SelectListDelegate(List<ActiveEntity> list);
-    public event SelectListDelegate SelectedListChanged;
-
     private ISelectable _selected;
-
-    public RTSCamera rtsCamera;
     #endregion
 
     #region Properties
@@ -24,10 +19,6 @@ public class SelectController : Controller
     }
     #endregion
 
-    #region States
-
-
-    #endregion
 
     #region Logic
 
@@ -42,39 +33,44 @@ public class SelectController : Controller
         {
             Deselect();
         }
-        if (UICamera.hoveredObject)
-            return;
         #region Selection
 
+        if (Input.GetMouseButtonDown(0))
+        {
+            if (UICamera.hoveredObject)
+                return;
 
-                    // Ray cast the target rather than selecting all within the bounds
-                    RaycastHit hit;
-                    if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, 1000f, 1 << 11))
+            // Ray cast the target rather than selecting all within the bounds
+            RaycastHit hit;
+            if (Physics.Raycast(Camera.main.ScreenPointToRay(Input.mousePosition), out hit, 1000f, 1 << 11))
+            {
+                if (hit.collider.GetComponent<ActiveEntity>() is ISelectable && hit.collider.GetComponent<ActiveEntity>() is IFactionFlag)
+                {
+                    ISelectable selectable = hit.collider.GetComponent<ActiveEntity>() as ISelectable;
+                    IFactionFlag flags = hit.collider.GetComponent<ActiveEntity>() as IFactionFlag;
+                    if ((flags.FactionFlags & PlayerSelectionFlags) == PlayerSelectionFlags)
                     {
-                        if (hit.collider.GetComponent<ActiveEntity>() is ISelectable && hit.collider.GetComponent<ActiveEntity>() is IFactionFlag)
-                        {
-                            ISelectable selectable = hit.collider.GetComponent<ActiveEntity>() as ISelectable;
-                            IFactionFlag flags = hit.collider.GetComponent<ActiveEntity>() as IFactionFlag;
-                            if ((ae.FactionFlags & _playerSelectionFlags) == _playerSelectionFlags)
-                            {
-                                selectedUnits.Add(ae);
-                                ae.IsSelected = true;
-                            }
-                        }
+                        _selected = selectable;
+                        _selected.IsSelected = true;
                     }
-            
-        
+                }
+            }
+        }
+
+
         #endregion
     }
 
     void OnDisable()
     {
-      //  Deselect();
+        Deselect();
     }
 
 
     public void Deselect()
     {
+        if (_selected != null)
+            _selected.IsSelected = false;
     }
 
 

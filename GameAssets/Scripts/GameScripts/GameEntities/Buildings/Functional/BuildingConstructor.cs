@@ -2,7 +2,7 @@
 using System.Collections;
 using System;
 
-public class BuildingConstructor : Building
+public class BuildingConstructor : Building, IFactionFlag, ISelectable
 {
 
     #region Fields
@@ -95,20 +95,6 @@ public class BuildingConstructor : Building
         BlueprintList.Instance.Blueprints.Remove(this);
     }
 
-    public new bool Damage(int damage)
-    {
-        // Substract build units. If build units is less than 0, the blueprint has been destroyed
-        currentBuildUnits -= damage;
-        if (currentBuildUnits < 0)
-        {
-            Destroy(gameObject);
-            return true;
-        }
-        else
-            return false;
-
-    }
-
     public override void PerformAction(PerformActionVariables actionEvent)
     {
         base.PerformAction(actionEvent);
@@ -179,7 +165,7 @@ public class BuildingConstructor : Building
             }
             Transform t = Instantiate(ConstructedPrefab, transform.position, transform.rotation) as Transform;
             t.parent = transform.parent;
-            t.GetComponent<ActiveEntity>().FactionFlags = FactionFlags;
+            t.GetComponent<Building>().FactionFlags = FactionFlags;
             Destroy(gameObject);
             return true;
         }

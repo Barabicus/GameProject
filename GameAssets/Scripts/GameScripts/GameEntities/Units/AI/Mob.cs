@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System;
+using System.ComponentModel;
 
 #region Delegates
 public delegate void MobAction(Mob mob);
@@ -15,7 +16,7 @@ public delegate void MobAction(Mob mob);
 [RequireComponent(typeof(WeaponControl))]
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(Resource))]
-public class Mob : ActiveEntity, ISelectable, IResource, IUnitName
+public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICitymanager, IFactionFlag
 {
 
     #region Events & Delegates
@@ -24,9 +25,6 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName
     #endregion
 
     #region Fields
-    public int maxHp = 0;
-    public int Hp = 0;
-
     private LivingState livingState = LivingState.Alive;
     protected MobSkills skills;
 
@@ -45,10 +43,6 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName
     /// </summary>
     public ActivityState _activityState = ActivityState.None;
     /// <summary>
-    /// The resources this mob is currently holding
-    /// </summary>
-    private Resource _resource;
-    /// <summary>
     /// The transform the mob is interacting with based on the current activity. 
     /// Eg if it is set to an enemy and it is within range it could be attacking this.
     /// </summary>
@@ -64,7 +58,6 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName
     private float _lastActionTime = 0.0f;
     private Transform _healthPivot;
     private House _house;
-    private CityManager _cityManager;
     private Gender _gender;
     private JobBuilding _jobBuilding;
     private PerformActionVariables _performActionVariables;
@@ -99,8 +92,8 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName
     }
     public CityManager CityManager
     {
-        get { return _cityManager; }
-        set { _cityManager = value; }
+        get;
+        set;
     }
     public FactionFlags FactionFlags
     {
@@ -132,6 +125,13 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName
     public WeaponControl Weapon
     {
         get { return _weaponcontrol; }
+    }
+
+    [DefaultValue("NotSet")]
+    public string UnitName
+    {
+        get;
+        set;
     }
 
     bool _isSelected;
@@ -200,7 +200,8 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName
     }
     public Resource Resource
     {
-        get { return _resource; }
+        get;
+        set;
     }
     /// <summary>
     /// Checks to see if the mobs attack timer has reached 0. Everytime the mob attacks
@@ -223,10 +224,8 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName
             {
                 case LivingState.Dead:
                     AIPath.enabled = false;
-                    enemies.Clear();
                     FactionFlags = global::FactionFlags.None;
                     EnemyFlags = global::FactionFlags.None;
-                    SelectableList.RemoveSelectableEntity(this);
                     IsSelected = false;
                     // Fire dead events
                     if (Killed != null)
@@ -236,11 +235,6 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName
             }
             livingState = value;
         }
-    }
-    public string MobName
-    {
-        get { return _mobName; }
-        set { _mobName = value; }
     }
     #endregion
 
@@ -259,7 +253,6 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName
     public override void Start()
     {
         base.Start();
-        SelectableList.AddSelectableEntity(this);
         if (tag != "Mob")
             Debug.LogWarning(gameObject.ToString() + "'s tag is not set to Mob!");
         if (transform.FindChild("_selectedTransform") == null)
@@ -285,13 +278,11 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName
          */
 
         rigidbody.isKinematic = true;
-        Hp = maxHp;
         _aiPath = GetComponent<AIPath>();
         _selectedTransform = transform.FindChild("_selectedTransform");
         if (_selectedTransform == null)
             Debug.LogWarning(gameObject.ToString() + "does not have a select transform, don't forget to add one!");
-        SelectableList.AddSelectableEntity(this);
-        _resource = GetComponent<Resource>();
+        Resource = GetComponent<Resource>();
 
         // Set Speed
         AIPath.speed = skills.speed;
@@ -313,42 +304,6 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName
     #endregion
 
     #region MobLogic
-
-    public void Attack(IDamageable target, int damage)
-    {
-        if (CanAttack)
-        {
-            Animator.SetTrigger("combo");
-            target.Damage(damage);
-            _attackTime = skills.attackSpeed;
-        }
-    }
-
-    /// <summary>
-    /// Damages the mob with the specified amount
-    /// </summary>
-    /// <param name="damage"></param>
-    /// <returns>Returns true if the mob was damages otherwise it returns false. 
-    /// Returning false could indicate the mob is in a state where it can't be damaged
-    /// such as dead
-    /// </returns>
-    public override bool Damage(int damage)
-    {
-        if (MobLivingState == LivingState.Alive)
-        {
-            Hp = Math.Max(Hp - damage, 0);
-            if (Hp == 0)
-            {
-                MobLivingState = LivingState.Dead;
-                return false;
-            }
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
 
     /// <summary>
     /// An internal method that is called when the mob dies. Mobs inherting this class that wish to handle
@@ -377,7 +332,7 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName
                 case ActivityState.Attacking:
                     if (distanceToTarget() < 10f)
                     {
-                        Attack(ActionEntity, skills.attackPower);
+                        // Attacking not yet supported
                     }
                     break;
                 case ActivityState.Supplying:
@@ -435,6 +390,9 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName
         // Avoid trying to set commands on self
         if (actionEvent.entity == this)
             return;
+        // Null if not applicable. If this is accessed it is only because the referenced tags assumes this interface
+        // has been implemented
+        IFactionFlag otherFlags = this;
         switch (actionEvent.tag)
         {
             case "Ground":
@@ -442,7 +400,7 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName
                 AIPath.targetCoord = actionEvent.vector3Args[0];
                 break;
             case "Mob":
-                if (IsEnemey(actionEvent.entity.FactionFlags))
+                if (IsEnemey(otherFlags.FactionFlags))
                 {
                     // The action is an enemy. Set mode to attacking and move to position
                     // Note that the pathfinding AI determains the attack distance before attacking events are fired
@@ -455,7 +413,7 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName
                 }
                 break;
             case "Building":
-                if (IsEnemey(actionEvent.entity.FactionFlags))
+                if (IsEnemey(otherFlags.FactionFlags))
                 {
                     CurrentActivity = ActivityState.Attacking;
                     SetEntityAndFollow(actionEvent.entity);
@@ -470,7 +428,7 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName
                 SetEntityAndFollow(actionEvent.entity);
                 break;
             case "BluePrint":
-                if (!IsEnemey(actionEvent.entity.FactionFlags))
+                if (IsEnemey(otherFlags.FactionFlags))
                 {
                     CurrentActivity = ActivityState.Supplying;
                     SetEntityAndFollow(actionEvent.entity);
@@ -501,8 +459,6 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName
     }
 
     #endregion
-
-
 }
 
 public struct MobSkills

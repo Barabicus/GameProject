@@ -6,24 +6,20 @@ using System.Collections.Generic;
 [RequireComponent(typeof(BuildingInfo))]
 [RequireComponent(typeof(Resource))]
 [RequireComponent(typeof(DynamicGridObstacle))]
-public class Building : ActiveEntity, ISelectable, ICitymanager
+public class Building : ActiveEntity, ISelectable, ICitymanager, IResource, IFactionFlag
 {
 
     #region Fields
-    public int maxHP;
     public float tickFrequency = 5;
     public BuildingCategory buildingCategory;
-    public bool isInvincible = false;
     public List<BuildingControl.ControlType> ControlComponents;
 
-    protected int currentHP;
     public BuildState buildState = BuildState.Constructed;
 
     private BuildingControl _controlInstance;
     private FactionFlags _factionFlags = FactionFlags.None;
     private FactionFlags _enemyFlags = FactionFlags.None;
     private float _lastTick;
-    private Resource _resource;
     private BuildingResourceRequestManager _buildingResourceRequestManager;
 
     #endregion
@@ -36,7 +32,8 @@ public class Building : ActiveEntity, ISelectable, ICitymanager
     #region Properties
     public Resource Resource
     {
-        get { return _resource; }
+        get;
+        set;
     }
     public CityManager CityManager
     {
@@ -49,25 +46,13 @@ public class Building : ActiveEntity, ISelectable, ICitymanager
     }
     public FactionFlags FactionFlags
     {
-        get
-        {
-            return _factionFlags;
-        }
-        set
-        {
-            _factionFlags = value;
-        }
+        get;
+        set;
     }
     public FactionFlags EnemyFlags
     {
-        get
-        {
-            return _factionFlags;
-        }
-        set
-        {
-            _factionFlags = value;
-        }
+        get;
+        set;
     }
     #endregion
 
@@ -84,6 +69,12 @@ public class Building : ActiveEntity, ISelectable, ICitymanager
         Funtional,
         Housing,
         Storage
+    }
+
+    public bool IsSelected
+    {
+        get;
+        set;
     }
 
     #endregion
@@ -117,10 +108,9 @@ public class Building : ActiveEntity, ISelectable, ICitymanager
             _controlInstance.gameObject.AddComponent<UIFollowTarget>().target = transform.FindChild("_pivot");
             _controlInstance.gameObject.SetActive(false);
         }
-        _resource = GetComponent<Resource>();
+        Resource = GetComponent<Resource>();
         _lastTick = Time.time;
         transform.parent.GetComponent<IslandManager>().cityManager.AddBuilding(this);
-        SelectableList.AddSelectableEntity(this);
         _buildingResourceRequestManager = new BuildingResourceRequestManager(this);
     }
 
@@ -128,33 +118,6 @@ public class Building : ActiveEntity, ISelectable, ICitymanager
     #endregion
 
     #region Logic
-
-
-    /// <summary>
-    /// The method that actually damages the building.
-    /// </summary>
-    /// <param name="damage"></param>
-    /// <returns>Returns true if the building was damaged or false if the building could not be damaged</returns>
-    public override bool Damage(int damage)
-    {
-        if (buildState == BuildState.Constructed)
-        {
-            currentHP = Math.Max(currentHP - damage, 0);
-            if (currentHP == 0)
-            {
-                buildState = BuildState.Destroyed;
-                // Trigger Destroyed events
-                if (Destroyed != null)
-                    Destroyed(this);
-                return false;
-            }
-            return true;
-        }
-        else
-        {
-            return false;
-        }
-    }
 
     public virtual void Update()
     {
@@ -266,7 +229,6 @@ public class Building : ActiveEntity, ISelectable, ICitymanager
     }
 
     #endregion
-
 }
 
 public class BuildingResourceRequestManager
