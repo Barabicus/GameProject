@@ -16,7 +16,7 @@ public delegate void MobAction(Mob mob);
 [RequireComponent(typeof(WeaponControl))]
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(Resource))]
-public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICitymanager, IFactionFlag
+public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICitymanager, IFactionFlag, ICurrencyContainer
 {
 
     #region Events & Delegates
@@ -41,7 +41,7 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICitymanager
     /// <summary>
     /// What this mob is currently doing. Eg idle, moving, attacking etc
     /// </summary>
-    public ActivityState _activityState = ActivityState.None;
+    private ActivityState _activityState = ActivityState.None;
     /// <summary>
     /// The transform the mob is interacting with based on the current activity. 
     /// Eg if it is set to an enemy and it is within range it could be attacking this.
@@ -58,13 +58,13 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICitymanager
     private float _lastActionTime = 0.0f;
     private Transform _healthPivot;
     private House _house;
-    private Gender _gender;
     private JobBuilding _jobBuilding;
     private PerformActionVariables _performActionVariables;
 
     #endregion
 
     #region Properties
+    public Gender Gender { get; set; }
     public PerformActionVariables PerformActionVariables
     {
         get { return _performActionVariables; }
@@ -81,6 +81,11 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICitymanager
                 CityManager.UnemployedCitizens.Remove(this);
             _jobBuilding = value;
         }
+    }
+    public int Currency
+    {
+        get;
+        set;
     }
     public bool HasJobBuilding
     {
@@ -127,7 +132,6 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICitymanager
         get { return _weaponcontrol; }
     }
 
-    [DefaultValue("NotSet")]
     public string UnitName
     {
         get;
@@ -243,16 +247,22 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICitymanager
     public override void Awake()
     {
         base.Awake();
-        skills = new MobSkills(0.5f, 3f, 1, 5f, 0.5f, 1, 0.5f);
+        skills = new MobSkills(2f, 1.5f, 1, 5f, 0.5f, 1, 0.5f);
         FactionFlags = global::FactionFlags.one;
         _anim = GetComponent<Animator>();
         _weaponcontrol = GetComponent<WeaponControl>();
-        Physics.IgnoreLayerCollision(11, 11);
     }
 
     public override void Start()
     {
         base.Start();
+        // How much Currency this mob brings initially
+        Currency = 1000;
+        // Set Gender
+        if (Gender == global::Gender.NotSet)
+        {
+            Gender = UnityEngine.Random.Range(0, 1) == 0 ? Gender.Male : Gender.Female;
+        }
         if (tag != "Mob")
             Debug.LogWarning(gameObject.ToString() + "'s tag is not set to Mob!");
         if (transform.FindChild("_selectedTransform") == null)
@@ -286,6 +296,8 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICitymanager
 
         // Set Speed
         AIPath.speed = skills.speed;
+
+        UnitName = "No Name";
 
     }
 
@@ -505,6 +517,7 @@ public enum ActivityState
 
 public enum Gender
 {
+    NotSet,
     Male,
     Female
 }

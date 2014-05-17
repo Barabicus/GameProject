@@ -15,38 +15,23 @@ public class StorageBuilding : Building
         _acceptedResources = new List<ResourceType>(acceptedResources);
     }
 
-    public override void PerformAction(PerformActionVariables actionEvent)
+    protected override void Supply(Mob mob, PerformActionVariables actionVariables)
     {
-        base.PerformAction(actionEvent);
-        if (actionEvent.tag.Equals("Mob"))
+        bool isMobResourceEmpty = true;
+        foreach (ResourceType rt in actionVariables.resourceTypesArgs)
         {
-            Mob m = actionEvent.entity.GetComponent<Mob>();
-
-            switch (m.CurrentActivity)
+            if (_acceptedResources.Contains(rt))
             {
-                case ActivityState.Supplying:
-                    bool isMobResourceEmpty = true;
-                    foreach (ResourceType rt in actionEvent.resourceTypesArgs)
-                    {
-                        if (_acceptedResources.Contains(rt))
-                        {
-                            if (m.Resource.CurrentResources[rt] > 0)
-                            {
-                                Resource.TransferResources(m.Resource, rt, 1);
-                                isMobResourceEmpty = false;
-                                break;
-                            }
-                        }
-                    }
-                    if (isMobResourceEmpty)
-                        m.CurrentActivity = ActivityState.None;
+                if (mob.Resource.CurrentResources[rt] > 0)
+                {
+                    Resource.TransferResources(mob.Resource, rt, 1);
+                    isMobResourceEmpty = false;
                     break;
-                case ActivityState.Retrieving:
-                    m.Resource.TransferResources(Resource, actionEvent.resourceTypesArgs[0], actionEvent.intArgs[0]);
-                    m.CurrentActivity = ActivityState.None;
-                    break;
+                }
             }
         }
+        if (isMobResourceEmpty)
+            mob.CurrentActivity = ActivityState.None;
     }
 
 }

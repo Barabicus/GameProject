@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class BuildingControl : MonoBehaviour
+public sealed class BuildingControl : MonoBehaviour
 {
 
 
@@ -10,7 +10,7 @@ public class BuildingControl : MonoBehaviour
     public Transform ContentArea;
     public UIGrid TabLine;
 
-    List<Transform> _tabs;
+    List<Transform> _tabs = new List<Transform>();
 
     public Transform TabPrefab;
 
@@ -20,6 +20,7 @@ public class BuildingControl : MonoBehaviour
     public ControlComponent BasicInfoComponent;
     public ControlComponent HouseComponent;
     public ControlComponent JobBuildingComponent;
+    public ControlComponent ProgressComponent;
 
     #endregion
 
@@ -27,10 +28,6 @@ public class BuildingControl : MonoBehaviour
 
     public Building ParentObject { get; set; }
 
-    void Awake()
-    {
-        _tabs = new List<Transform>();
-    }
 
     void Start()
     {
@@ -53,6 +50,9 @@ public class BuildingControl : MonoBehaviour
                 break;
             case ControlType.JobBuilding:
                 controlComp = Instantiate(JobBuildingComponent) as ControlComponent;
+                break;
+            case ControlType.Blueprint:
+                controlComp = Instantiate(ProgressComponent) as ControlComponent;
                 break;
         }
 
@@ -77,12 +77,18 @@ public class BuildingControl : MonoBehaviour
 
     }
 
-    public enum ControlType
+    public void CloseInstance()
     {
-        BasicInfo,
-        Resource,
-        House,
-        JobBuilding
+        BuildControlsGUIManager.Instance.CurrentControlBox = null;
     }
 
+}
+
+public enum ControlType
+{
+    BasicInfo,
+    Resource,
+    House,
+    JobBuilding,
+    Blueprint
 }

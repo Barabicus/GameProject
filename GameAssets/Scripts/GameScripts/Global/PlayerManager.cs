@@ -38,6 +38,13 @@ public class PlayerManager : MonoBehaviour
     }
     #endregion
 
+    void Awake()
+    {
+        Physics.IgnoreLayerCollision(11, 11);
+     //   Physics.IgnoreLayerCollision(11, 10);
+
+    }
+
 	void Start () {
         if (Instance != null)
         {
@@ -61,11 +68,6 @@ public class PlayerManager : MonoBehaviour
             return null;
         _currentPopulation++;
         Mob m = Instantiate(MonsterList.Instance.Monsters[id], spawnPoint.position, spawnPoint.rotation) as Mob;
-      /*  foreach (ParticleSystem ps in spawnParticles)
-        {
-            Instantiate(ps, spawnPoint.position, Quaternion.Euler(new Vector3(90, 0, 0)));
-        }
-       */
         return m;
     }
 	

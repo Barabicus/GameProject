@@ -6,39 +6,48 @@ public class HouseControlComponent : ControlComponent {
 
     public UILabel populationLabel;
     public UITable table;
-    public UILabel labelPrefab;
+    public Transform labelPrefab;
 
     private House _house;
-    private List<UILabel> _tableLabels;
+    private Dictionary<Mob, GameObject> _tableLabels;
 
     void Awake()
     {
-        _tableLabels = new List<UILabel>();
+        _tableLabels = new Dictionary<Mob, GameObject>();
     }
     
     void Start()
     {
         _house = ParentObject.GetComponent<House>();
         CheckForNull(_house);
-      
+        _house.ResidentAdded += AddResidentBar;
+        _house.ResidentRemoved += ResidentRemoved;
+        populationLabel.text = "0 / 0";      
         // Create Labels
-        for (int i = 0; i < _house.maxResidents; i++)
+        for (int i = 0; i < _house.CurrentResidents.Count; i++)
         {
-            UILabel l = Instantiate(labelPrefab) as UILabel;
-            l.transform.parent = table.transform;
-            l.transform.localScale = new Vector3(1, 1, 1);
-            _tableLabels.Add(l);
+            AddResidentBar(_house.CurrentResidents[i]);
         }
         table.Reposition();
     }
 
-    void Update()
+    void AddResidentBar(Mob mob)
     {
-        populationLabel.text = _house.CurrentResidents.Count + " / " + _house.maxResidents;
-    //    for (int i = 0; i < _tableLabels.Count; i++)
-    //    {
-    //        _tableLabels[i].text = (_house.CurrentResidents.Count <= i-1 && _house.CurrentResidents[i] != null) ? _house.CurrentResidents[i].MobName : noMob;
-    //    }
+        GameObject c = NGUITools.AddChild(table.gameObject, labelPrefab.gameObject);
+        UILabel label = c.transform.FindChild("Name").GetComponent<UILabel>();
+        label.text = mob.UnitName;
+        _tableLabels.Add(mob, c);
+        populationLabel.text = _tableLabels.Count + " / " +_house.maxResidents;
+        table.Reposition();
     }
+
+    void ResidentRemoved(Mob mob)
+    {
+        Destroy(_tableLabels[mob]);
+        _tableLabels.Remove(mob);
+        populationLabel.text = _tableLabels.Count + " / " + _house.maxResidents;
+        table.Reposition();
+    }
+
 
 }

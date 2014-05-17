@@ -33,6 +33,11 @@ public interface IFactionFlag
     FactionFlags FactionFlags { get; set; }
 }
 
+public interface ICurrencyContainer
+{
+    int Currency { get; set; }
+}
+
 [System.Flags]
 public enum FactionFlags
 {

@@ -4,7 +4,6 @@ using System.Collections;
 public class JobBuildingControlComponent : ControlComponent {
 
     public UILabel amountLabel;
-    public UILabel unassignedAmount;
     JobBuilding _building;
 
 
@@ -18,7 +17,16 @@ public class JobBuildingControlComponent : ControlComponent {
 	// Update is called once per frame
     void Update()
     {
-        amountLabel.text = _building.Workers.Count + " / " + _building.maxWorkers;
-        unassignedAmount.text = _building.UnassignedWorkers.Count + " / " + _building.maxWorkers;
+        amountLabel.text = _building.Workers.Count.ToString() + " / " + _building.MaxWorkers;
+    }
+
+    public void IncreaseJob()
+    {
+        _building.MaxWorkers += 1;
+    }
+
+    public void DecreaseJobs()
+    {
+        _building.MaxWorkers = Mathf.Max(0, _building.MaxWorkers - 1);
     }
 }

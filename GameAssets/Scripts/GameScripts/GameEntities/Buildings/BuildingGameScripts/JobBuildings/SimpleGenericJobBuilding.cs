@@ -26,7 +26,6 @@ public class SimpleGenericJobBuilding : JobBuilding
     protected override void Tick()
     {
         base.Tick();
-
         if (_currentRequest == null)
         {
             _currentRequest = CityManager.TakeResourceRequest(this);
@@ -68,7 +67,7 @@ public class SimpleGenericJobBuilding : JobBuilding
                         // It will just fill the units Resource container with the maximum amount.
                         mob.PerformActionVariables = new PerformActionVariables(mob, _currentRequest.NextRequest.ResourceType, Mathf.Abs(mob.Resource.CurrentResources[_currentRequest.NextRequest.ResourceType] - _currentRequest.NextRequest.Amount));
                         mob.CurrentActivity = ActivityState.Retrieving;
-                        mob.SetEntityAndFollow(CityManager.StorageBuildings[0]);
+                        mob.SetEntityAndFollow(CityManager.ClosestStorageBuilding(mob));
                     }
                     //If we have enough resources, deliver
                     else

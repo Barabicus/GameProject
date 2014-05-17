@@ -5,7 +5,7 @@ using System.Collections;
 public class SimpleMobAI : AIPath {
 
 
-  /*  public override Transform target
+    public override Transform target
     {
         get
         {
@@ -23,7 +23,7 @@ public class SimpleMobAI : AIPath {
             targetCoord = value.transform.position - heading * (endReachedDistance);
         }
     }
-   */
+   
 
     /** Minimum velocity for moving */
     public float sleepVelocity = 0.4F;

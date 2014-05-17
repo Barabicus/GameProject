@@ -2,7 +2,7 @@
 using System.Collections;
 using System;
 
-public class BuildingConstructor : Building, IFactionFlag, ISelectable
+public class BuildingConstructor : Building
 {
 
     #region Fields
@@ -92,6 +92,7 @@ public class BuildingConstructor : Building, IFactionFlag, ISelectable
 
     void OnDestroy()
     {
+        base.OnDestroy();
         BlueprintList.Instance.Blueprints.Remove(this);
     }
 

@@ -1,8 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System;
 
-public class CityManager : Building
+public class CityManager : Building, ICurrencyContainer
 {
 
     #region Fields
@@ -31,8 +32,15 @@ public class CityManager : Building
     /// List of houses
     /// </summary>
     private List<House> _houses;
+    private float _lastDayTick;
 
-    public ParticleSystem[] spawnParticles;
+    /// <summary>
+    /// Frequency to trigger a day tick
+    /// </summary>
+    public int dayTickFrequency = 60;
+    public event Action DayTickEvent;
+    public int StartCurrency = 10000;
+    public int tax = 10;
 
     #endregion
 
@@ -40,6 +48,11 @@ public class CityManager : Building
     public List<Mob> UnemployedCitizens
     {
         get { return _unemployedCitizens; }
+    }
+    public int Currency
+    {
+        get;
+        set;
     }
     public List<Mob> Citizens
     {
@@ -91,6 +104,7 @@ public class CityManager : Building
             _cachedResourceNumbers.Add(t, 0);
         }
         _activeRequests = new List<BuildingResourceRequestManager>();
+        Currency = StartCurrency;
         base.Start();
     }
     #endregion
@@ -101,6 +115,32 @@ public class CityManager : Building
     #endregion
 
     #region Logic
+
+    public StorageBuilding ClosestStorageBuilding(Vector3 position)
+    {
+        StorageBuilding closest = null;
+        foreach (StorageBuilding sb in StorageBuildings)
+        {
+            if (closest == null)
+            {
+                closest = sb;
+                continue;
+            }
+            if (Vector3.Distance(sb.transform.position, position) < Vector3.Distance(closest.transform.position, position))
+                closest = sb;
+        }
+        return closest;
+    }
+
+    public StorageBuilding ClosestStorageBuilding(Building building)
+    {
+        return ClosestStorageBuilding(building.transform.position);
+    }
+
+    public StorageBuilding ClosestStorageBuilding(Mob mob)
+    {
+        return ClosestStorageBuilding(mob.transform.position);
+    }
 
     public void AddResourceOrderRequest(BuildingResourceRequestManager request)
     {
@@ -128,6 +168,7 @@ public class CityManager : Building
         _buildings.Add(building);
         building.CityManager = this;
         building.Destroyed += RemoveBuilding;
+        DayTickEvent += building.DayTick;
     }
 
     public void RemoveBuilding(Building building)
@@ -135,6 +176,8 @@ public class CityManager : Building
         if (_buildings.Contains(building))
         {
             _buildings.Remove(building);
+            building.Destroyed -= RemoveBuilding;
+            DayTickEvent -= building.DayTick;
         }
     }
 
@@ -166,6 +209,17 @@ public class CityManager : Building
         _cachedResourceNumbers[type] = amount;
     }
     #endregion
+
+    public override void Update()
+    {
+        base.Update();
+        if (Time.time - _lastDayTick > dayTickFrequency)
+        {
+            _lastDayTick = Time.time;
+            if (DayTickEvent != null)
+                DayTickEvent();
+        }
+    }
 
     protected override void Tick()
     {

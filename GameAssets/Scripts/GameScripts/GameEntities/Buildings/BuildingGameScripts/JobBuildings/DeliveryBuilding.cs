@@ -11,6 +11,7 @@ public class DeliveryBuilding : JobBuilding {
     protected override void Tick()
     {
         base.Tick();
+
         if (_currentRequest == null)
         {
             _currentRequest = CityManager.TakeResourceRequest(this);
@@ -28,13 +29,14 @@ public class DeliveryBuilding : JobBuilding {
     }
 
     /// <summary>
-    /// Infrom all the workers the delivery task has been filed and to stop what they are doing
+    /// Inform all the workers the delivery task has been filed and to stop what they are doing immediantly.
     /// </summary>
     void DeliveryRequestFilled()
     {
         foreach (Mob m in Workers)
         {
-            m.CurrentActivity = ActivityState.None;
+         //   m.CurrentActivity = ActivityState.None;
+            m.JobTask = BuildTask;
         }
         _currentRequest = null;
 
@@ -56,7 +58,7 @@ public class DeliveryBuilding : JobBuilding {
                         // It will just fill the units Resource container with the maximum amount.
                         mob.PerformActionVariables = new PerformActionVariables(mob, _currentRequest.NextRequest.ResourceType, Mathf.Abs(mob.Resource.CurrentResources[_currentRequest.NextRequest.ResourceType] - _currentRequest.NextRequest.Amount));
                         mob.CurrentActivity = ActivityState.Retrieving;
-                        mob.SetEntityAndFollow(CityManager.StorageBuildings[0]);
+                        mob.SetEntityAndFollow(CityManager.ClosestStorageBuilding(mob));
                     }
                     //If we have enough resources, deliver
                     else
@@ -67,6 +69,26 @@ public class DeliveryBuilding : JobBuilding {
                     }
                 }
                 break;
+        }
+    }
+
+    void BuildTask(Mob mob)
+    {
+        if (BlueprintList.Instance.Blueprints.Count == 0)
+        {
+            mob.CurrentActivity = ActivityState.None;
+            mob.JobTask = null;
+            return;
+        }
+        foreach (BuildingConstructor bc in BlueprintList.Instance.Blueprints)
+        {
+            if (bc.HasBeenSupplied && mob.CurrentActivity != ActivityState.Building)
+            {
+                mob.CurrentActivity = ActivityState.Building;
+                mob.PerformActionVariables = new PerformActionVariables(mob);
+                mob.SetEntityAndFollow(bc);
+                break;
+            }
         }
     }
 

@@ -6,6 +6,8 @@ using System.Collections.ObjectModel;
 public class House : Building
 {
 
+    public event MobAction ResidentAdded;
+    public event MobAction ResidentRemoved;
     public int maxResidents;
     public Transform spawnPoint;
 
@@ -14,14 +16,12 @@ public class House : Building
     private List<Mob> _currentResidents;
 
     #region Properties
-    /// <summary>
-    /// Returns a readonly list of the current residents of this house. 
-    /// </summary>
-    public ReadOnlyCollection<Mob> CurrentResidents
+
+    public List<Mob> CurrentResidents
     {
         get
         {
-            return _currentResidents.AsReadOnly();
+            return _currentResidents;
         }
     }
 
@@ -37,8 +37,8 @@ public class House : Building
         _currentResidents = new List<Mob>();
         foreach (Mob m in tempResidents)
         {
-			if(m == null)
-				continue;
+            if (m == null)
+                continue;
             AddResident(m);
         }
     }
@@ -56,6 +56,8 @@ public class House : Building
 
     public void AddResident(Mob mob)
     {
+        if (mob == null)
+            return;
         if (_currentResidents.Count < maxResidents && !_currentResidents.Contains(mob))
         {
             mob.Killed += RemoveResident;
@@ -65,6 +67,8 @@ public class House : Building
             mob.House = this;
             _currentResidents.Add(mob);
         }
+        if (ResidentAdded != null)
+            ResidentAdded(mob);
     }
 
     public void RemoveResident(Mob mob)
@@ -73,14 +77,18 @@ public class House : Building
         {
             _currentResidents.Remove(mob);
         }
+        if (ResidentRemoved != null)
+            ResidentRemoved(mob);
     }
 
     protected override void Tick()
     {
         base.Tick();
+
         if (HasRoom)
         {
             AddResident(PlayerManager.Instance.SpawnMonster(1, spawnPoint));
         }
+
     }
 }

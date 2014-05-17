@@ -9,7 +9,7 @@ public class LumberjackBuilding : JobBuilding
     protected override void Tick()
     {
         base.Tick();
-        if (Resource.CurrentResources[ResourceType.Wood] < 200)
+        if (IsBuildingWorking)
         {
             foreach (Mob m in Workers)
             {
@@ -19,7 +19,6 @@ public class LumberjackBuilding : JobBuilding
                 }
             }
         }
-
     }
 
     void LumberTask(Mob mob)

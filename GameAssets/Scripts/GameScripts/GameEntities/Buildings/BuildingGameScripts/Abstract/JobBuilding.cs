@@ -5,11 +5,29 @@ using System.Collections.Generic;
 public abstract class JobBuilding : Building {
 
     private List<Mob> _workers;
-    public int maxWorkers = 0;
+
+    public int maxAmountOfWorkers = 0;
+    public int workWage = 20;
+    public bool IsBuildingWorking = true;
 
     public List<Mob> Workers
     {
         get { return _workers; }
+    }
+
+    int _maxWorkers;
+    public int MaxWorkers
+    {
+        get
+        {
+            return _maxWorkers;
+        }
+        set
+        {
+            if (_workers.Count > value)
+                RemoveWorker(_workers[_workers.Count - 1]);
+            _maxWorkers = Mathf.Min(value, maxAmountOfWorkers);
+        }
     }
 
     public List<Mob> UnassignedWorkers
@@ -25,14 +43,17 @@ public abstract class JobBuilding : Building {
     {
         base.Awake();
         _workers = new List<Mob>();
+        _maxWorkers = maxAmountOfWorkers;
     }
 
     protected override void Tick()
     {
         base.Tick();
+        if (!IsBuildingWorking)
+            return;
         foreach (Mob m in CityManager.Citizens)
         {
-            if (Workers.Count == maxWorkers)
+            if (Workers.Count == _maxWorkers)
                 break;
             if (!m.HasJobBuilding)
                 AddWorker(m);
@@ -47,7 +68,7 @@ public abstract class JobBuilding : Building {
     public bool AddWorker(Mob m)
     {
         // Cant add another worker
-        if (_workers.Count >= maxWorkers || _workers.Contains(m))
+        if (_workers.Count >= _maxWorkers || _workers.Contains(m))
             return false;
         if (m.JobBuilding != null)
             m.JobBuilding.RemoveWorker(m);
@@ -62,6 +83,7 @@ public abstract class JobBuilding : Building {
         {
             m.JobBuilding = null;
             m.JobTask = null;
+            m.CurrentActivity = ActivityState.None;
             _workers.Remove(m);
             return true;
         }
@@ -110,7 +132,7 @@ public abstract class JobBuilding : Building {
             // We have enough resources, time to supply
             mob.CurrentActivity = ActivityState.Supplying;
             mob.PerformActionVariables = new PerformActionVariables(mob, ResourceType.Wood, 10);
-            mob.SetEntityAndFollow(building.CityManager.StorageBuildings[0]);
+            mob.SetEntityAndFollow(building.CityManager.ClosestStorageBuilding(mob));
         }
     }
 

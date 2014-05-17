@@ -12,7 +12,8 @@ public class Building : ActiveEntity, ISelectable, ICitymanager, IResource, IFac
     #region Fields
     public float tickFrequency = 5;
     public BuildingCategory buildingCategory;
-    public List<BuildingControl.ControlType> ControlComponents;
+    [HideInInspector]
+    public List<ControlType> ControlComponents;
 
     public BuildState buildState = BuildState.Constructed;
 
@@ -94,7 +95,7 @@ public class Building : ActiveEntity, ISelectable, ICitymanager, IResource, IFac
         {
             _controlInstance = NGUITools.AddChild(HUDRoot.go, BuildingGUIProperties.Instance.BasePrefab).GetComponent<BuildingControl>();
             _controlInstance.ParentObject = this;
-            foreach (BuildingControl.ControlType c in ControlComponents)
+            foreach (ControlType c in ControlComponents)
             {
                 _controlInstance.AddTab(c);
             }
@@ -151,9 +152,18 @@ public class Building : ActiveEntity, ISelectable, ICitymanager, IResource, IFac
                     case ActivityState.Supplying:
                         Supply(m, actionVariables);
                         break;
+                    case ActivityState.Retrieving:
+                        Retrieve(m, actionVariables);
+                        break;
                 }
                 break;
         }
+    }
+
+    protected virtual void Retrieve(Mob mob, PerformActionVariables actionVariables)
+    {
+        mob.Resource.TransferResources(Resource, actionVariables.resourceTypesArgs[0], actionVariables.intArgs[0]);
+        mob.CurrentActivity = ActivityState.None;
     }
 
     protected virtual void Supply(Mob mob, PerformActionVariables actionVariables)
@@ -163,7 +173,9 @@ public class Building : ActiveEntity, ISelectable, ICitymanager, IResource, IFac
         {
             if (mob.Resource.CurrentResources[rt] > 0)
             {
-                Resource.TransferResources(mob.Resource, rt, actionVariables.intArgs[0]);
+              //  Resource.TransferResources(mob.Resource, rt, actionVariables.intArgs[0]);
+                Resource.TransferResources(mob.Resource, rt, 1);
+
                 isMobResourceEmpty = false;
                 break;
             }
@@ -178,6 +190,12 @@ public class Building : ActiveEntity, ISelectable, ICitymanager, IResource, IFac
     /// </summary>
     protected virtual void Tick() { }
 
+    /// <summary>
+    /// Fired after a period of time judged by the CityManager. Assumed a day game time. This is fired synchronously across all buildings
+    /// under the city's control.
+    /// </summary>
+    public virtual void DayTick() { Debug.Log("Day Tick"); }
+
     void OnMouseDown()
     {
         if (UICamera.hoveredObject)
@@ -188,7 +206,7 @@ public class Building : ActiveEntity, ISelectable, ICitymanager, IResource, IFac
         }
     }
 
-    void OnDestroy()
+    protected virtual void OnDestroy()
     {
         if (_controlInstance != null)
         {

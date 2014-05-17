@@ -138,7 +138,7 @@ public class RTSCamera : MonoBehaviour
 
         transform.position += new Vector3(transform.right.x, 0, transform.right.z) * Input.GetAxis("Horizontal") * speed * (Time.deltaTime / Time.timeScale);
         transform.position += Quaternion.Euler(0, transform.localEulerAngles.y, transform.localEulerAngles.z) * Vector3.forward * Input.GetAxis("Vertical") * speed * (Time.deltaTime / Time.timeScale);
-        transform.position = Vector3.Lerp(transform.position, new Vector3(transform.position.x, newHeight, transform.position.z), (Time.deltaTime / Time.timeScale) * zoomLerpSpeed);
+        transform.position = Vector3.Lerp(transform.position, new Vector3(transform.position.x, newHeight, transform.position.z), /*(Time.deltaTime / Time.timeScale)*/ Time.fixedDeltaTime * zoomLerpSpeed);
     }
 
     void OnGUI()

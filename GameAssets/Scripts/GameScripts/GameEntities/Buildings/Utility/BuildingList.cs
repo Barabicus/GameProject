@@ -10,7 +10,6 @@ public class BuildingList : MonoBehaviour
     public Building[] buildings;
     public List<Type> acceptedComponents = new List<Type>();
     public Material ConstructionMaterial;
-    public BuildingControl constructionControlPrefab;
 
     Transform[] _buildBlueprintPrefabs;
     Transform[] _buildPreviewPrefabs;
@@ -82,6 +81,10 @@ public class BuildingList : MonoBehaviour
                 g.GetComponent<BuildingInfo>().CopyFromOther(buildings[i].GetComponent<BuildingInfo>());
                 g.AddComponent<BuildingConstructor>();
                 g.GetComponent<BuildingConstructor>().ConstructedPrefab = buildings[i].transform;
+                // Create a new Control Components list for the building constructor
+                g.GetComponent<BuildingConstructor>().ControlComponents = new List<ControlType>();
+                g.GetComponent<BuildingConstructor>().ControlComponents.Add(ControlType.Blueprint);
+                g.GetComponent<BuildingConstructor>().ControlComponents.Add(ControlType.Resource);
                 ConstructPreviewPrefab(buildings[i].gameObject, g, BuildingType.Blueprint);
                 g.transform.parent = transform;
                 g.SetActive(false);
@@ -193,12 +196,13 @@ public class BuildingList : MonoBehaviour
         {
             case BuildingType.Blueprint:
                 obj.tag = "BluePrint";
+                obj.layer = 11;
                 break;
             case BuildingType.Preview:
                 obj.tag = "Preview";
+                obj.layer = 10;
                 break;
         }
-        obj.layer = 10;
         obj.transform.position = blueprint.transform.position;
         obj.transform.rotation = blueprint.transform.rotation;
         obj.transform.localScale = blueprint.transform.localScale;
