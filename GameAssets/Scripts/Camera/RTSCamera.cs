@@ -18,6 +18,7 @@ public class RTSCamera : MonoBehaviour
     public float tiltMaxHeight = 110f;
     public float lowTilt = 15f;
     public float highTilt = 60f;
+    public float tiltIncrement = 5;
     public float maxHeight = 125f;
     public float minimumY = -40F;
     public float maximumY = 80F;
@@ -81,9 +82,24 @@ public class RTSCamera : MonoBehaviour
         zoomAmount = -Input.GetAxis("Mouse ScrollWheel");
     }
 
+    /// <summary>
+    /// Automatically adjust the tilt depending how close the camera is to the ground
+    /// </summary>
     void AdjustTilt()
     {
-        transform.rotation = Quaternion.Euler(new Vector3(Mathf.Lerp(lowTilt, highTilt, GetPercent(transform.position.y, tiltMaxHeight) / 100), transform.localEulerAngles.y, transform.localEulerAngles.z));
+        if (Input.GetKeyDown(KeyCode.KeypadMinus))
+        {
+            Debug.Log(highTilt);
+            highTilt = Mathf.Max(lowTilt, highTilt - tiltIncrement);
+            Debug.Log(highTilt);
+        }
+        if (Input.GetKeyDown(KeyCode.KeypadPlus))
+        {
+            highTilt = Mathf.Max(lowTilt, highTilt + tiltIncrement);
+        }
+        RaycastHit hit;
+        Physics.Raycast(new Vector3(transform.position.x, transform.position.y, transform.position.z), -Vector3.up, out hit, Mathf.Infinity, 1 << 9);
+        transform.rotation = Quaternion.Euler(new Vector3(Mathf.Lerp(lowTilt, highTilt, GetPercent(hit.distance, tiltMaxHeight) / 100), transform.localEulerAngles.y, transform.localEulerAngles.z));
     }
 
     void FreeAdjustTilt()
@@ -109,6 +125,7 @@ public class RTSCamera : MonoBehaviour
         {
             zoomAmount = zoomAmount < 0 ? 0 : zoomAmount;
         }
+
 
         if (Input.GetMouseButtonDown(2))
         {

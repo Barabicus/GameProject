@@ -24,6 +24,7 @@ public class CityManager : Building, ICurrencyContainer
     private List<Building> _buildings;
     private List<Mob> _citizens;
     private List<BuildingResourceRequestManager> _activeRequests;
+    private List<BuildingConstructor> _blueprints;
     /// <summary>
     /// Cached list of all the citizens that are currently unemployed.
     /// </summary>
@@ -93,7 +94,9 @@ public class CityManager : Building, ICurrencyContainer
         _buildings = new List<Building>();
         _citizens = new List<Mob>();
         _houses = new List<House>();
+        _activeRequests = new List<BuildingResourceRequestManager>();
         _spawnPoint = transform.FindChild("_SpawnPoint");
+        _blueprints = new List<BuildingConstructor>();
     }
 
     public override void Start()
@@ -103,7 +106,6 @@ public class CityManager : Building, ICurrencyContainer
         {
             _cachedResourceNumbers.Add(t, 0);
         }
-        _activeRequests = new List<BuildingResourceRequestManager>();
         Currency = StartCurrency;
         base.Start();
     }
@@ -163,6 +165,21 @@ public class CityManager : Building, ICurrencyContainer
         return bm;
     }
 
+    public void AddBlueprint(BuildingConstructor blueprint)
+    {
+        _blueprints.Add(blueprint);
+    }
+
+    public BuildingConstructor TakeBlueprintContract()
+    {
+        BuildingConstructor bc = _blueprints.Find(b => b.HasBeenSupplied);
+        if (bc != null)
+        {
+            _blueprints.Remove(bc);
+        }
+        return bc;
+    }
+
     public void AddBuilding(Building building)
     {
         _buildings.Add(building);
@@ -192,7 +209,6 @@ public class CityManager : Building, ICurrencyContainer
             m.CityManager.RemoveCitizen(m);
         m.CityManager = this;
         return true;
-
     }
 
     public bool RemoveCitizen(Mob m)
@@ -225,6 +241,4 @@ public class CityManager : Building, ICurrencyContainer
     {
         base.Tick();
     }
-
-
 }

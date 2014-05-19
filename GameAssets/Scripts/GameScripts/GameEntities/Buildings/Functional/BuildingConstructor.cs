@@ -75,7 +75,7 @@ public class BuildingConstructor : Building
         requiredResources = GetComponent<BuildingInfo>().requiredResources;
         requiredResourceAmount = GetComponent<BuildingInfo>().requiredResourceAmount;
         FactionFlags = GetComponent<BuildingInfo>().factionFlags;
-        BlueprintList.Instance.Blueprints.Add(this);
+        CityManager.AddBlueprint(this);
         Resource.maxWeight = 5000;
 
         // Add Resource Requests for this building
@@ -89,12 +89,6 @@ public class BuildingConstructor : Building
     #endregion
 
     #region Logic
-
-    void OnDestroy()
-    {
-        base.OnDestroy();
-        BlueprintList.Instance.Blueprints.Remove(this);
-    }
 
     public override void PerformAction(PerformActionVariables actionEvent)
     {
@@ -116,7 +110,7 @@ public class BuildingConstructor : Building
     protected override void Supply(Mob mob, PerformActionVariables actionVariables)
     {
         base.Supply(mob, actionVariables);
-        SupplyResources(mob.Resource, actionVariables);
+        SupplyCheck();
     }
 
     /// <summary>
@@ -124,7 +118,7 @@ public class BuildingConstructor : Building
     /// </summary>
     /// <param name="resource"></param>
     /// <param name="actionVariables"></param>
-    void SupplyResources(Resource resource, PerformActionVariables actionVariables)
+    void SupplyCheck()
     {
         if (_resourceRequirementMet)
             return;

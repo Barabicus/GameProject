@@ -15,7 +15,6 @@ public class SimpleGenericJobBuilding : JobBuilding
     public override void Start()
     {
         base.Start();
-        blueprints = BlueprintList.Instance.Blueprints;
     }
 
     public override void Awake()

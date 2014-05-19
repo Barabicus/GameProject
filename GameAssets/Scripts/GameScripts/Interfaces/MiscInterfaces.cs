@@ -1,6 +1,11 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+public interface IRequestManager
+{
+
+}
+
 public interface ISelectable
 {
     bool IsSelected { get; set; }

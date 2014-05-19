@@ -6,6 +6,7 @@ public class DeliveryBuilding : JobBuilding {
 
 
     BuildingResourceRequestManager _currentRequest;
+    BuildingConstructor _currentBlueprint;
 
 
     protected override void Tick()
@@ -18,12 +19,23 @@ public class DeliveryBuilding : JobBuilding {
             if (_currentRequest != null)
                 _currentRequest.ResourceRequestFilled += DeliveryRequestFilled;
         }
+        if (_currentBlueprint == null)
+        {
+            _currentBlueprint = CityManager.TakeBlueprintContract();
+        }
 
         if (_currentRequest != null)
         {
             foreach (Mob m in UnassignedWorkers)
             {
                 m.JobTask = DeliveryTask;
+            }
+        }
+        if (_currentBlueprint != null)
+        {
+            foreach (Mob m in UnassignedWorkers)
+            {
+                m.JobTask = BuildTask;
             }
         }
     }
@@ -74,20 +86,18 @@ public class DeliveryBuilding : JobBuilding {
 
     void BuildTask(Mob mob)
     {
-        if (BlueprintList.Instance.Blueprints.Count == 0)
+        if (_currentBlueprint == null)
         {
             mob.CurrentActivity = ActivityState.None;
             mob.JobTask = null;
             return;
-        }
-        foreach (BuildingConstructor bc in BlueprintList.Instance.Blueprints)
+        }else
         {
-            if (bc.HasBeenSupplied && mob.CurrentActivity != ActivityState.Building)
+            if (mob.CurrentActivity != ActivityState.Building)
             {
                 mob.CurrentActivity = ActivityState.Building;
                 mob.PerformActionVariables = new PerformActionVariables(mob);
-                mob.SetEntityAndFollow(bc);
-                break;
+                mob.SetEntityAndFollow(_currentBlueprint);
             }
         }
     }

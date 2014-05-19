@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System;
 using System.ComponentModel;
 
 #region Delegates
@@ -247,7 +246,7 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICitymanager
     public override void Awake()
     {
         base.Awake();
-        skills = new MobSkills(2f, 1.5f, 1, 5f, 0.5f, 1, 0.5f);
+        skills = new MobSkills(2f, Random.Range(1.25f, 1.75f), 1, 5f, 0.5f, 1, 0.5f);
         FactionFlags = global::FactionFlags.one;
         _anim = GetComponent<Animator>();
         _weaponcontrol = GetComponent<WeaponControl>();
@@ -329,7 +328,7 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICitymanager
 
     protected virtual void LivingUpdate()
     {
-        _attackTime = Math.Max(_attackTime - Time.deltaTime, 0);
+        _attackTime = System.Math.Max(_attackTime - Time.deltaTime, 0);
         if (ActionEntity == null && CurrentActivity != ActivityState.None)
         {
             CurrentActivity = ActivityState.None;
@@ -530,7 +529,7 @@ public enum LivingState
 
 #region Flags
 
-[Flags]
+[System.Flags]
 public enum MobFlags
 {
     None = 0x0,
