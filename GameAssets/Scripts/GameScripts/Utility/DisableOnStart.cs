@@ -3,9 +3,11 @@ using System.Collections;
 
 public class DisableOnStart : MonoBehaviour {
 
+    public bool disable;
+
     void Awake()
     {
-        gameObject.SetActive(false);
+        gameObject.SetActive(!disable);
     }
 
 }

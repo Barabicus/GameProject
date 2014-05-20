@@ -2,11 +2,13 @@
 using System.Collections;
 
 [RequireComponent(typeof(Animator))]
+[RequireComponent(typeof(HighlightableObject))]
 public class WorldResource : ActiveEntity
 {
 
     #region Fields
     public ResourceType resource;
+    public Transform deathPrefab;
     public bool isInfinite = false;
     public bool regenerates = false;
     public int currentAmount = 0;
@@ -19,7 +21,6 @@ public class WorldResource : ActiveEntity
 
     private float _timeCount = 0;
     private ResourceState _resourceState = ResourceState.Active;
-    private Animator animator;
     #endregion
 
     #region properties
@@ -31,8 +32,9 @@ public class WorldResource : ActiveEntity
             switch (value)
             {
                 case ResourceState.Dying:
-                    animator.enabled = true;
-                    animator.SetTrigger("dying");
+                    Transform  t = (Transform)Instantiate(deathPrefab, transform.position, transform.rotation);
+                    t.localScale = transform.parent.localScale;
+                    Destroy(gameObject);
                     break;
             }
             _resourceState = value;
@@ -44,7 +46,6 @@ public class WorldResource : ActiveEntity
     public override void Awake()
     {
         base.Awake();
-        animator = GetComponent<Animator>();
     }
 
     // Use this for initialization
@@ -91,11 +92,6 @@ public class WorldResource : ActiveEntity
 
             if (currentAmount == 0 && !isInfinite)
                 ResourceState = global::ResourceState.Dying;
-            if (!isInfinite && !regenerates && currentAmount == 0)
-            {
-                ResourceState = global::ResourceState.Dying;
-                animator.SetTrigger("Dying");
-            }
         }
     }
 
@@ -110,11 +106,6 @@ public class WorldResource : ActiveEntity
                 HarvestResource(actionEvent.entity.GetComponent<Mob>().Resource, 1);
                 break;
         }
-    }
-
-    public void DestroyResource()
-    {
-        Destroy(gameObject);
     }
 
 }

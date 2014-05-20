@@ -132,7 +132,7 @@ public abstract class JobBuilding : Building {
             // We have enough resources, time to supply
             mob.CurrentActivity = ActivityState.Supplying;
             mob.PerformActionVariables = new PerformActionVariables(mob, ResourceType.Wood, 10);
-            mob.SetEntityAndFollow(building.CityManager.ClosestStorageBuilding(mob));
+            mob.SetEntityAndFollow(building.CityManager.ClosestStorageBuilding(building));
         }
     }
 

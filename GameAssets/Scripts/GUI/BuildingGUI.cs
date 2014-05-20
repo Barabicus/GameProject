@@ -16,8 +16,8 @@ public class BuildingGUI : MonoBehaviour
             t.parent = buildingGrid.transform;
             t.localScale = new Vector3(1, 1, 1);
             t.localPosition = Vector3.zero;
-       //     t.GetComponent<UILabel>().text = BuildingList.Instance.buildings[i].GetComponent<BuildingInfo>().BuildingName;
-       //     t.GetComponent<UITexture>().mainTexture = AssetPreview.GetAssetPreview(BuildingList.Instance.buildings[i]);
+            UILabel label = t.transform.FindChild("label").GetComponent<UILabel>();
+            label.text = BuildingList.Instance.BuildingBlueprintPrefabs[i].GetComponent<BuildingInfo>().BuildingName;
 
 
             Transform _blueprintRef = BuildingList.Instance.BuildingBlueprintPrefabs[i];

@@ -89,13 +89,11 @@ public class RTSCamera : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.KeypadMinus))
         {
-            Debug.Log(highTilt);
             highTilt = Mathf.Max(lowTilt, highTilt - tiltIncrement);
-            Debug.Log(highTilt);
         }
         if (Input.GetKeyDown(KeyCode.KeypadPlus))
         {
-            highTilt = Mathf.Max(lowTilt, highTilt + tiltIncrement);
+            highTilt = Mathf.Min(90, Mathf.Max(lowTilt, highTilt + tiltIncrement));
         }
         RaycastHit hit;
         Physics.Raycast(new Vector3(transform.position.x, transform.position.y, transform.position.z), -Vector3.up, out hit, Mathf.Infinity, 1 << 9);

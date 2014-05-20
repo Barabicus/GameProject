@@ -70,7 +70,7 @@ public class DeliveryBuilding : JobBuilding {
                         // It will just fill the units Resource container with the maximum amount.
                         mob.PerformActionVariables = new PerformActionVariables(mob, _currentRequest.NextRequest.ResourceType, Mathf.Abs(mob.Resource.CurrentResources[_currentRequest.NextRequest.ResourceType] - _currentRequest.NextRequest.Amount));
                         mob.CurrentActivity = ActivityState.Retrieving;
-                        mob.SetEntityAndFollow(CityManager.ClosestStorageBuilding(mob));
+                        mob.SetEntityAndFollow(CityManager.ClosestStorageBuilding(this));
                     }
                     //If we have enough resources, deliver
                     else

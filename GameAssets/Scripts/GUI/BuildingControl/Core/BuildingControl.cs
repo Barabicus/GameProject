@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public sealed class BuildingControl : MonoBehaviour
 {
 
-
+    public UIPanel panel;
     public UILabel BuildingLabel;
     public Transform ContentArea;
     public UIGrid TabLine;
@@ -80,6 +80,15 @@ public sealed class BuildingControl : MonoBehaviour
     public void CloseInstance()
     {
         BuildControlsGUIManager.Instance.CurrentControlBox = null;
+    }
+
+    // TODO find out the cause of the panel not being updates properly and substitute for the proper change
+    /// <summary>
+    /// Dirty Workaround
+    /// </summary>
+    void LateUpdate()
+    {
+        panel.Invalidate(true);
     }
 
 }
