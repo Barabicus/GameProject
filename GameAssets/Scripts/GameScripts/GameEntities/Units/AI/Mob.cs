@@ -401,9 +401,7 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICitymanager
         // Avoid trying to set commands on self
         if (actionEvent.entity == this)
             return;
-        // Null if not applicable. If this is accessed it is only because the referenced tags assumes this interface
-        // has been implemented
-        IFactionFlag otherFlags = this;
+        Debug.Log(IsEnemey(FactionFlags));
         switch (actionEvent.tag)
         {
             case "Ground":
@@ -411,7 +409,7 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICitymanager
                 AIPath.targetCoord = actionEvent.vector3Args[0];
                 break;
             case "Mob":
-                if (IsEnemey(otherFlags.FactionFlags))
+                if (IsEnemey(FactionFlags))
                 {
                     // The action is an enemy. Set mode to attacking and move to position
                     // Note that the pathfinding AI determains the attack distance before attacking events are fired
@@ -424,7 +422,7 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICitymanager
                 }
                 break;
             case "Building":
-                if (IsEnemey(otherFlags.FactionFlags))
+                if (IsEnemey(FactionFlags))
                 {
                     CurrentActivity = ActivityState.Attacking;
                     SetEntityAndFollow(actionEvent.entity);
@@ -439,12 +437,13 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICitymanager
                 SetEntityAndFollow(actionEvent.entity);
                 break;
             case "BluePrint":
-                if (IsEnemey(otherFlags.FactionFlags))
+                if (!IsEnemey(FactionFlags))
                 {
                     CurrentActivity = ActivityState.Supplying;
                     SetEntityAndFollow(actionEvent.entity);
                 }
                 break;
+
         }
     }
 

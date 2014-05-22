@@ -30,6 +30,11 @@ public abstract class ActiveEntity : GameEntity
     public virtual void Start()
     {
         IsHighlightable = true;
+        if (this is IFactionFlag)
+        {
+            IFactionFlag flag = this as IFactionFlag;
+            flag.FactionFlags = FactionFlags.one;
+        }
     }
 
     public virtual void Awake()

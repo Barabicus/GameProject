@@ -11,7 +11,6 @@ public class SelectController : Controller
     #endregion
 
     #region Properties
-    [DefaultValue(FactionFlags.one)]
     public FactionFlags PlayerSelectionFlags
     {
         get;
@@ -19,12 +18,28 @@ public class SelectController : Controller
     }
     #endregion
 
+    private ISelectable Selected
+    {
+        get { return _selected; }
+        set
+        {
+            if (_selected != null)
+                _selected.IsSelected = false;
+            _selected = value;
+        }
+    }
 
     #region Logic
 
     public override void Awake()
     {
         base.Awake();
+    }
+
+    public override void Start()
+    {
+        base.Start();
+        PlayerSelectionFlags = FactionFlags.one;
     }
 
     void Update()
@@ -50,8 +65,8 @@ public class SelectController : Controller
                     IFactionFlag flags = hit.collider.GetComponent<ActiveEntity>() as IFactionFlag;
                     if ((flags.FactionFlags & PlayerSelectionFlags) == PlayerSelectionFlags)
                     {
-                        _selected = selectable;
-                        _selected.IsSelected = true;
+                        Selected = selectable;
+                        Selected.IsSelected = true;
                     }
                 }
             }
