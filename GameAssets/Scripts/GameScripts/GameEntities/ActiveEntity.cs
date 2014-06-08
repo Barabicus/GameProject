@@ -27,8 +27,9 @@ public abstract class ActiveEntity : GameEntity
 
     #endregion
 
-    public virtual void Start()
+    public override void Start()
     {
+        base.Start();
         IsHighlightable = true;
         if (this is IFactionFlag)
         {
@@ -37,8 +38,9 @@ public abstract class ActiveEntity : GameEntity
         }
     }
 
-    public virtual void Awake()
+    public override void Awake()
     {
+        base.Awake();
         gameObject.AddComponent<HighlightableObject>();
         _ho = gameObject.GetComponent<HighlightableObject>();
     }

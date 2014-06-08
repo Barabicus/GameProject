@@ -131,6 +131,8 @@ public class CityManager : Building, ICurrencyContainer
             if (Vector3.Distance(sb.transform.position, position) < Vector3.Distance(closest.transform.position, position))
                 closest = sb;
         }
+        if (closest == null)
+            Debug.LogError("Closest equal null");
         return closest;
     }
 

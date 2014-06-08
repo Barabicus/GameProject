@@ -25,7 +25,6 @@ public class BasicInfoControlComponent : ControlComponent {
         {
             _updateText = () =>
                 {
-                    JobBuilding h = BuildingControl.ParentObject.GetComponent<JobBuilding>();
                     _updateText = () => { pop.text = "This is a job building"; };
                 };
         }

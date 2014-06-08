@@ -31,6 +31,11 @@ public class HouseControlComponent : ControlComponent {
         table.Reposition();
     }
 
+    void OnEnable()
+    {
+        table.Reposition();
+    }
+
     void AddResidentBar(Mob mob)
     {
         GameObject c = NGUITools.AddChild(table.gameObject, labelPrefab.gameObject);

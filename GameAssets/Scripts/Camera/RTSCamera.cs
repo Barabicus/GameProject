@@ -32,6 +32,11 @@ public class RTSCamera : MonoBehaviour
     /// The camera will lerp to this rotation
     /// </summary>
     private Quaternion _newRot;
+    /// <summary>
+    /// The current value used as high tilt. This is lerped to user input to provide a smooth transcation between 
+    /// user view changes.
+    /// </summary>
+    private float _currentHighTilt;
 
     #endregion
 
@@ -67,6 +72,7 @@ public class RTSCamera : MonoBehaviour
     {
         rotationY = transform.rotation.eulerAngles.x;
         newHeight = transform.position.y;
+        _currentHighTilt = highTilt;
     }
 
     #endregion
@@ -95,9 +101,10 @@ public class RTSCamera : MonoBehaviour
         {
             highTilt = Mathf.Min(90, Mathf.Max(lowTilt, highTilt + tiltIncrement));
         }
+        _currentHighTilt = Mathf.Lerp(_currentHighTilt, highTilt, Time.deltaTime * 2.5f);
         RaycastHit hit;
         Physics.Raycast(new Vector3(transform.position.x, transform.position.y, transform.position.z), -Vector3.up, out hit, Mathf.Infinity, 1 << 9);
-        transform.rotation = Quaternion.Euler(new Vector3(Mathf.Lerp(lowTilt, highTilt, GetPercent(hit.distance, tiltMaxHeight) / 100), transform.localEulerAngles.y, transform.localEulerAngles.z));
+        transform.rotation = Quaternion.Euler(new Vector3(Mathf.Lerp(lowTilt, _currentHighTilt, GetPercent(hit.distance, tiltMaxHeight) / 100), transform.localEulerAngles.y, transform.localEulerAngles.z));
     }
 
     void FreeAdjustTilt()

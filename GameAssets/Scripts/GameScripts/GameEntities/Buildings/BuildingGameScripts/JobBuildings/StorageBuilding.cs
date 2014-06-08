@@ -11,7 +11,7 @@ public class StorageBuilding : Building
     public override void Start()
     {
         base.Start();
-        Resource.AddResource(ResourceType.Meat, 50);
+        Resource.AddResource(ResourceType.Wood, 50);
         _acceptedResources = new List<ResourceType>(acceptedResources);
     }
 
@@ -32,6 +32,14 @@ public class StorageBuilding : Building
         }
         if (isMobResourceEmpty)
             mob.CurrentActivity = ActivityState.None;
+    }
+
+    public bool CanSupply(ResourceType rType, int amount)
+    {
+        if (Resource[rType] >= amount)
+            return true;
+        else
+            return false;
     }
 
 }

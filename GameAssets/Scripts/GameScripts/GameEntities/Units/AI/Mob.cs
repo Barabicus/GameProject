@@ -401,7 +401,6 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICitymanager
         // Avoid trying to set commands on self
         if (actionEvent.entity == this)
             return;
-        Debug.Log(IsEnemey(FactionFlags));
         switch (actionEvent.tag)
         {
             case "Ground":

@@ -61,13 +61,13 @@ public class PlayerManager : MonoBehaviour
     /// </summary>
     /// <param name="id"></param>
     /// <returns>Returns a mob is a monster was spawned or null if a mob was not spawned</returns>
-    public Mob SpawnMonster(int id, Transform spawnPoint)
+    public Mob SpawnMonster(int id, Vector3 spawnPoint, Quaternion spawnRotation)
     {
         // Don't spawn if our population is too great
         if (_currentPopulation >= maxPopulation)
             return null;
         _currentPopulation++;
-        Mob m = Instantiate(MonsterList.Instance.Monsters[id], spawnPoint.position, spawnPoint.rotation) as Mob;
+        Mob m = Instantiate(MonsterList.Instance.Monsters[id], spawnPoint, spawnRotation) as Mob;
         return m;
     }
 	

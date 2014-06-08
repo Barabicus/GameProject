@@ -11,11 +11,11 @@ public abstract class GameEntity : MonoBehaviour
 
     #endregion
 
-    protected virtual void Awake()
+    public virtual void Awake()
     {
     }
 
-    protected virtual void Start()
+    public virtual void Start()
     {
 
     }

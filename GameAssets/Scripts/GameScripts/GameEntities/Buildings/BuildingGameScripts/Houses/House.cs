@@ -87,7 +87,10 @@ public class House : Building
 
         if (HasRoom)
         {
-            AddResident(PlayerManager.Instance.SpawnMonster(1, spawnPoint));
+            // Find Spawn point
+            RaycastHit hit;
+            Physics.Raycast(new Ray(spawnPoint.position + new Vector3(0, 100, 0), -Vector3.up), out hit, Mathf.Infinity, 1 << 9);
+            AddResident(PlayerManager.Instance.SpawnMonster(1, hit.point + new Vector3(0, 2, 0), spawnPoint.rotation));
         }
 
     }

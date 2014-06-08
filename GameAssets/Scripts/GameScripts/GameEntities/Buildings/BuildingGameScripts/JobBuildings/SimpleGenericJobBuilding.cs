@@ -104,7 +104,7 @@ public class SimpleGenericJobBuilding : JobBuilding
 
     void LumberTask(Mob mob)
     {
-        JobBuilding.LumberTask(this, mob);
+
     }
 
 }
