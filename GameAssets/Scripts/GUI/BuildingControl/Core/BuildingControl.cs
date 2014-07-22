@@ -21,6 +21,7 @@ public sealed class BuildingControl : MonoBehaviour
     public ControlComponent HouseComponent;
     public ControlComponent JobBuildingComponent;
     public ControlComponent ProgressComponent;
+    public ControlComponent CityManagerComponent;
 
     #endregion
 
@@ -53,6 +54,9 @@ public sealed class BuildingControl : MonoBehaviour
                 break;
             case ControlType.Blueprint:
                 controlComp = Instantiate(ProgressComponent) as ControlComponent;
+                break;
+            case ControlType.CityManager:
+                controlComp = Instantiate(CityManagerComponent) as ControlComponent;
                 break;
         }
 
@@ -99,5 +103,6 @@ public enum ControlType
     Resource,
     House,
     JobBuilding,
-    Blueprint
+    Blueprint,
+    CityManager
 }

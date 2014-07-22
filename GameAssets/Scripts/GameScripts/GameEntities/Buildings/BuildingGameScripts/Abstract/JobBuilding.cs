@@ -1,20 +1,46 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 
 public abstract class JobBuilding : Building {
 
-    private List<Mob> _workers;
+    private List<WorkerDetail> _workers;
+    private int hourlyWage = 5;
+    private bool _isBuildingWorking = true;
 
     public int maxAmountOfWorkers = 0;
-    public int workWage = 20;
-    public bool IsBuildingWorking = true;
+
+    public bool IsBuildingWorking
+    {
+        get { return _isBuildingWorking; }
+        set
+        {
+            if (value == false)
+            {
+                for (int i = _workers.Count - 1; i >= 0; i--)
+                {
+                    RemoveWorker(_workers[i].Mob);
+                }
+            }
+            _isBuildingWorking = value;
+        }
+    }
 
     public List<Mob> Workers
     {
-        get { return _workers; }
+        get
+        {
+            var workers = from p in _workers select p.Mob;
+            return workers.ToList<Mob>();
+        }
     }
 
+    /// <summary>
+    /// The Current amount of workers allowed to work here. This value
+    /// can be changed during gameplay to allow larger or smaller amounts. 
+    /// This amount is limited by the maxAmountOfWorkers variable.
+    /// </summary>
     int _maxWorkers;
     public int MaxWorkers
     {
@@ -25,7 +51,7 @@ public abstract class JobBuilding : Building {
         set
         {
             if (_workers.Count > value)
-                RemoveWorker(_workers[_workers.Count - 1]);
+                RemoveWorker(_workers[_workers.Count - 1].Mob);
             _maxWorkers = Mathf.Min(value, maxAmountOfWorkers);
         }
     }
@@ -34,7 +60,8 @@ public abstract class JobBuilding : Building {
     {
         get
         {
-            return _workers.FindAll(m => m.JobTask == null);
+            var workers = from w in _workers where w.Mob.JobTask == null select w.Mob;
+            return workers.ToList<Mob>();
         }
     }
 
@@ -42,14 +69,14 @@ public abstract class JobBuilding : Building {
     public override void Awake()
     {
         base.Awake();
-        _workers = new List<Mob>();
+        _workers = new List<WorkerDetail>();
         _maxWorkers = maxAmountOfWorkers;
     }
 
     protected override void Tick()
     {
         base.Tick();
-        if (!IsBuildingWorking)
+        if (!_isBuildingWorking)
             return;
         foreach (Mob m in CityManager.Citizens)
         {
@@ -68,27 +95,42 @@ public abstract class JobBuilding : Building {
     public bool AddWorker(Mob m)
     {
         // Cant add another worker
-        if (_workers.Count >= _maxWorkers || _workers.Contains(m))
+        if (_workers.Count >= _maxWorkers || Workers.Contains(m) || !IsBuildingWorking)
             return false;
         if (m.JobBuilding != null)
             m.JobBuilding.RemoveWorker(m);
         m.JobBuilding = this;
-        _workers.Add(m);
+        _workers.Add(new WorkerDetail(m, Time.time));
         return true;
     }
 
     public bool RemoveWorker(Mob m)
     {
-        if (_workers.Contains(m))
+        if (Workers.Contains(m))
         {
             m.JobBuilding = null;
             m.JobTask = null;
             m.CurrentActivity = ActivityState.None;
-            _workers.Remove(m);
+            _workers.Remove(_workers.Find(w => w.Mob == m));
             return true;
         }
         return false;
     }
+}
 
+struct WorkerDetail
+{
+    private Mob _worker;
+    private float _workCheckInTime;
+
+    public Mob Mob { get { return _worker; } }
+    public float CheckInTime { get { return _workCheckInTime; } }
+
+
+    public WorkerDetail(Mob worker, float checkInTime)
+    {
+        this._worker = worker;
+        this._workCheckInTime = checkInTime;
+    }
 
 }

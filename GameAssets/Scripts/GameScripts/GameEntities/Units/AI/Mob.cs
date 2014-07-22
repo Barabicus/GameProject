@@ -15,7 +15,7 @@ public delegate void MobAction(Mob mob);
 [RequireComponent(typeof(WeaponControl))]
 [RequireComponent(typeof(CharacterController))]
 [RequireComponent(typeof(Resource))]
-public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICitymanager, IFactionFlag, ICurrencyContainer
+public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICityManager, IFactionFlag
 {
 
     #region Events & Delegates
@@ -59,10 +59,15 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICitymanager
     private House _house;
     private JobBuilding _jobBuilding;
     private PerformActionVariables _performActionVariables;
+    private CurrencyContainer _wallet;
 
     #endregion
 
     #region Properties
+    public CurrencyContainer Wallet
+    {
+        get { return _wallet; }
+    }
     public Gender Gender { get; set; }
     public PerformActionVariables PerformActionVariables
     {
@@ -80,11 +85,6 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICitymanager
                 CityManager.UnemployedCitizens.Remove(this);
             _jobBuilding = value;
         }
-    }
-    public int Currency
-    {
-        get;
-        set;
     }
     public bool HasJobBuilding
     {
@@ -250,13 +250,14 @@ public class Mob : ActiveEntity, ISelectable, IResource, IUnitName, ICitymanager
         FactionFlags = global::FactionFlags.one;
         _anim = GetComponent<Animator>();
         _weaponcontrol = GetComponent<WeaponControl>();
+        _wallet = new CurrencyContainer();
     }
 
     public override void Start()
     {
         base.Start();
         // How much Currency this mob brings initially
-        Currency = 1000;
+        Wallet.Currency = 1000;
         // Set Gender
         if (Gender == global::Gender.NotSet)
         {

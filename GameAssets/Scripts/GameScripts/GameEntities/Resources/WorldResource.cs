@@ -31,7 +31,7 @@ public class WorldResource : ActiveEntity
         {
             switch (value)
             {
-                case ResourceState.Dying:
+                case ResourceState.Dead:
                     Transform  t = (Transform)Instantiate(deathPrefab, transform.position, transform.rotation);
                     t.localScale = transform.parent.localScale;
                     Destroy(gameObject);
@@ -69,7 +69,7 @@ public class WorldResource : ActiveEntity
                     }
                 }
                 break;
-            case global::ResourceState.Dying:
+            case global::ResourceState.Dead:
 
                 break;
         }
@@ -91,7 +91,7 @@ public class WorldResource : ActiveEntity
                 resource.AddResource(this.resource, amount);
 
             if (currentAmount == 0 && !isInfinite)
-                ResourceState = global::ResourceState.Dying;
+                ResourceState = global::ResourceState.Dead;
         }
     }
 
@@ -113,6 +113,5 @@ public class WorldResource : ActiveEntity
 public enum ResourceState
 {
     Active,
-    Dying,
-    Dead
+    Dead,
 }

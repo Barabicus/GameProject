@@ -18,9 +18,6 @@ public class ContentsTable : UIWidgetContainer
     void Start()
     {
         _widget = GetComponent<UIWidget>();
-        // Add all items to the list
-        //  _items = new List<BinaryLabelBar>(transform.GetComponentsInChildren<BinaryLabelBar>());
-        Execute();
     }
 
     [ContextMenu("Execute")]

@@ -8,6 +8,7 @@ public class BuildingInfo : MonoBehaviour {
     public int RequiredBuildUnits;
     public ResourceType[] requiredResources;
     public int[] requiredResourceAmount;
+    public int buildingPrice;
     public BuildingPlaceController.PlaceType placeType = BuildingPlaceController.PlaceType.Single;
     public FactionFlags factionFlags;
 
@@ -27,7 +28,8 @@ public class BuildingInfo : MonoBehaviour {
         this.requiredResourceAmount = info.requiredResourceAmount;
         this.placeType = info.placeType;
         this.factionFlags = info.factionFlags;
-        this.BuildingIcon = BuildingIcon;
+        this.BuildingIcon = info.BuildingIcon;
+        this.buildingPrice = info.buildingPrice;
     }
 
 }

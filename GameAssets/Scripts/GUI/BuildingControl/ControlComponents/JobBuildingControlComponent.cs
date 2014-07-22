@@ -10,8 +10,7 @@ public class JobBuildingControlComponent : ControlComponent {
 	// Use this for initialization
     void Start()
     {
-        _building = ParentObject.GetComponent<JobBuilding>();
-        CheckForNull(_building);
+        _building = GetParentObjectComponent<JobBuilding>();
     }
 	
 	// Update is called once per frame
@@ -28,5 +27,10 @@ public class JobBuildingControlComponent : ControlComponent {
     public void DecreaseJobs()
     {
         _building.MaxWorkers = Mathf.Max(0, _building.MaxWorkers - 1);
+    }
+
+    public void ToggleWorking(bool working)
+    {
+        _building.IsBuildingWorking = working;
     }
 }

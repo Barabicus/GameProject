@@ -8,13 +8,16 @@ public class ControlComponent : MonoBehaviour {
     public BuildingControl BuildingControl { get; set; }
     public Building ParentObject { get { return BuildingControl.ParentObject; } }
 
-    protected void CheckForNull(Object o)
+    protected T GetParentObjectComponent<T>() where T : Component
     {
-        if (o == null)
+        T comp = ParentObject.GetComponent<T>();
+        if (comp == null)
         {
             Debug.LogError("Could not get component is this Control Component attached to the proper building?");
             Destroy(this.gameObject);
+            return null;
         }
+        return comp;
     }
 
 

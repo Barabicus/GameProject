@@ -6,7 +6,7 @@ using System.Collections.Generic;
 [RequireComponent(typeof(BuildingInfo))]
 [RequireComponent(typeof(Resource))]
 [RequireComponent(typeof(DynamicGridObstacle))]
-public class Building : ActiveEntity, ISelectable, ICitymanager, IResource, IFactionFlag
+public class Building : ActiveEntity, ISelectable, ICityManager, IResource, IFactionFlag
 {
 
     #region Fields
@@ -91,6 +91,7 @@ public class Building : ActiveEntity, ISelectable, ICitymanager, IResource, IFac
     public override void Start()
     {
         base.Start();
+
         if (HUDRoot.go != null)
         {
             _controlInstance = NGUITools.AddChild(HUDRoot.go, BuildingGUIProperties.Instance.BasePrefab).GetComponent<BuildingControl>();
@@ -109,6 +110,8 @@ public class Building : ActiveEntity, ISelectable, ICitymanager, IResource, IFac
             _controlInstance.gameObject.AddComponent<UIFollowTarget>().target = transform.FindChild("_pivot");
             _controlInstance.gameObject.SetActive(false);
         }
+
+
         Resource = GetComponent<Resource>();
         _lastTick = Time.time;
         transform.parent.GetComponent<IslandManager>().cityManager.AddBuilding(this);
@@ -137,7 +140,8 @@ public class Building : ActiveEntity, ISelectable, ICitymanager, IResource, IFac
     /// </summary>
     protected void ForceTick()
     {
-        _lastTick += tickFrequency;
+        _lastTick = Time.time;
+        Tick();
     }
 
     public override void PerformAction(PerformActionVariables actionVariables)
@@ -162,7 +166,7 @@ public class Building : ActiveEntity, ISelectable, ICitymanager, IResource, IFac
 
     protected virtual void Retrieve(Mob mob, PerformActionVariables actionVariables)
     {
-        mob.Resource.TransferResources(Resource, actionVariables.resourceTypesArgs[0], actionVariables.intArgs[0]);
+        mob.Resource.TransferResources(Resource, actionVariables.resourceTypesArgs[0], 1);
         mob.CurrentActivity = ActivityState.None;
     }
 
@@ -173,7 +177,6 @@ public class Building : ActiveEntity, ISelectable, ICitymanager, IResource, IFac
         {
             if (mob.Resource.CurrentResources[rt] > 0)
             {
-              //  Resource.TransferResources(mob.Resource, rt, actionVariables.intArgs[0]);
                 Resource.TransferResources(mob.Resource, rt, 1);
 
                 isMobResourceEmpty = false;
@@ -194,7 +197,7 @@ public class Building : ActiveEntity, ISelectable, ICitymanager, IResource, IFac
     /// Fired after a period of time judged by the CityManager. Assumed a day game time. This is fired synchronously across all buildings
     /// under the city's control.
     /// </summary>
-    public virtual void DayTick() { Debug.Log("Day Tick"); }
+    public virtual void DayTick() { }
 
     void OnMouseDown()
     {
@@ -208,7 +211,7 @@ public class Building : ActiveEntity, ISelectable, ICitymanager, IResource, IFac
 
     protected virtual void OnDestroy()
     {
-        if (_controlInstance != null)
+        if (_controlInstance != null && BuildControlsGUIManager.Instance.CurrentControlBox == _controlInstance)
         {
             BuildControlsGUIManager.Instance.CurrentControlBox = null;
             Destroy(_controlInstance);

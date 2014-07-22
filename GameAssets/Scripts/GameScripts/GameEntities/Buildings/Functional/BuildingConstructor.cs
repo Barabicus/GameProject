@@ -65,7 +65,7 @@ public class BuildingConstructor : Building
     #region Initilization
 
     // Use this for initialization
-    void Start()
+    public override void Start()
     {
         base.Start();
 

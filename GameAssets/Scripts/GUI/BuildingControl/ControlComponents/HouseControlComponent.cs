@@ -18,8 +18,7 @@ public class HouseControlComponent : ControlComponent {
     
     void Start()
     {
-        _house = ParentObject.GetComponent<House>();
-        CheckForNull(_house);
+        _house = GetParentObjectComponent<House>();
         _house.ResidentAdded += AddResidentBar;
         _house.ResidentRemoved += ResidentRemoved;
         populationLabel.text = "0 / 0";      

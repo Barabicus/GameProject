@@ -2,7 +2,8 @@
 using System.Collections;
 using System.Collections.Generic;
 
-public class DeliveryBuilding : JobBuilding {
+public class DeliveryBuilding : JobBuilding
+{
 
 
     BuildingResourceRequestManager _currentRequest;
@@ -47,7 +48,7 @@ public class DeliveryBuilding : JobBuilding {
     {
         foreach (Mob m in Workers)
         {
-         //   m.CurrentActivity = ActivityState.None;
+            //   m.CurrentActivity = ActivityState.None;
             m.JobTask = BuildTask;
         }
         _currentRequest = null;
@@ -91,7 +92,8 @@ public class DeliveryBuilding : JobBuilding {
             mob.CurrentActivity = ActivityState.None;
             mob.JobTask = null;
             return;
-        }else
+        }
+        else
         {
             if (mob.CurrentActivity != ActivityState.Building)
             {

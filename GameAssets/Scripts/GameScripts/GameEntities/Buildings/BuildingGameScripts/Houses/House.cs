@@ -92,6 +92,13 @@ public class House : Building
             Physics.Raycast(new Ray(spawnPoint.position + new Vector3(0, 100, 0), -Vector3.up), out hit, Mathf.Infinity, 1 << 9);
             AddResident(PlayerManager.Instance.SpawnMonster(1, hit.point + new Vector3(0, 2, 0), spawnPoint.rotation));
         }
+    }
 
+    public override void DayTick()
+    {
+        foreach (Mob m in CurrentResidents)
+        {
+            CityManager.Wallet.TransferCurrency(m.Wallet, CityManager.tax);
+        }
     }
 }

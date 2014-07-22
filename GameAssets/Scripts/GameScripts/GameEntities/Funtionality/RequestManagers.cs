@@ -3,12 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-public class BlueprintResourceRequestManager : IRequestManager
-{
-    private BlueprintContract _blueprint;
-}
-
-public class BuildingResourceRequestManager : IRequestManager
+public class BuildingResourceRequestManager
 {
     /// <summary>
     /// The Building that this object looks out for to take Resource Orders for

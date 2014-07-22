@@ -139,7 +139,7 @@ Mathf.Round(hit.point.z / gridSize.z) * gridSize.z);
                     BuildingPreview.gameObject.SetActive(false);
                 }
             }
-        // Once everything has been moved set the placeable trigger to true
+        // Once everything has been moved we set the placeable trigger to true
         // A OnTriggerStay will be called on the associated BuildingPreview.
         // If a trigger exists then this will be false in the next frame
         // and so on until no triggers exist.

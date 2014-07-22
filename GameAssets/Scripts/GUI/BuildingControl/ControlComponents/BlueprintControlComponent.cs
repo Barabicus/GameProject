@@ -9,8 +9,7 @@ public class BlueprintControlComponent : ControlComponent {
 	// Use this for initialization
     void Start()
     {
-        _bConst = ParentObject.GetComponent<BuildingConstructor>();
-        CheckForNull(_bConst);
+        _bConst = GetParentObjectComponent<BuildingConstructor>();
     }
 	
 	// Update is called once per frame

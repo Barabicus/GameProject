@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-public class CityManager : Building, ICurrencyContainer
+public class CityManager : Building
 {
 
     #region Fields
@@ -34,6 +34,7 @@ public class CityManager : Building, ICurrencyContainer
     /// </summary>
     private List<House> _houses;
     private float _lastDayTick;
+    private CurrencyContainer _wallet;
 
     /// <summary>
     /// Frequency to trigger a day tick
@@ -46,15 +47,16 @@ public class CityManager : Building, ICurrencyContainer
     #endregion
 
     #region Properties
+    public CurrencyContainer Wallet
+    {
+        get { return _wallet; }
+    }
+
     public List<Mob> UnemployedCitizens
     {
         get { return _unemployedCitizens; }
     }
-    public int Currency
-    {
-        get;
-        set;
-    }
+
     public List<Mob> Citizens
     {
         get { return _citizens; }
@@ -90,6 +92,7 @@ public class CityManager : Building, ICurrencyContainer
     public override void Awake()
     {
         base.Awake();
+        _wallet = new CurrencyContainer();
         _unemployedCitizens = new List<Mob>();
         _buildings = new List<Building>();
         _citizens = new List<Mob>();
@@ -106,7 +109,7 @@ public class CityManager : Building, ICurrencyContainer
         {
             _cachedResourceNumbers.Add(t, 0);
         }
-        Currency = StartCurrency;
+        Wallet.Currency = StartCurrency;
         base.Start();
     }
     #endregion
